@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+# Ignore any backup files.
+*~
+*.bak
+
