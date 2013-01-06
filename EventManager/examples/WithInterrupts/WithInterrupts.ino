@@ -94,6 +94,6 @@ void setup()
 void loop() 
 {
     // Handle any events that are in the queue
-    gEM.processEvents();
+    gEM.processEvent();
 }
 
