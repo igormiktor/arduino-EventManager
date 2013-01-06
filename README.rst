@@ -295,18 +295,13 @@ There are various class functions for managing the listeners:
 
     - You can remove listeners (``removeListener()``), 
     - Disable and enable specific listeners (``enableListener()``), 
-    - Set a default listener that will handle any events not handled by other
-        listeners and manipulate the default listener just like any other listener
-        (``setDefaultListener()``, ``removeDefaultListener()``, and
-        ``enableDefaultListener()``)
-    - Check the status of the listener list (``isListenerListEmpty()``,
-        ``isListenerListFull()``)
+    - Set a default listener that will handle any events not handled by other listeners and manipulate the default listener just like any other listener (``setDefaultListener()``, ``removeDefaultListener()``, and ``enableDefaultListener()``)
+    - Check the status of the listener list (``isListenerListEmpty()``, ``isListenerListFull()``)
     
 There are various class functions that provide information about the event
 queue:
 
-    - Check the status of the event queue (``isEventQueueEmpty()``,
-        ``isEventQueueFull()``)
+    - Check the status of the event queue (``isEventQueueEmpty()``, ``isEventQueueFull()``)
     - See how many events are in the queue (``getNumEventsInQueue()``)
     
 For details on these functions you should review *EventManager.h*.
