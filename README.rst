@@ -27,16 +27,16 @@ Installation
 ------------
 
 Copy the folder `EventManager` into your Arduino `Libraries` folder, as
-described in the `Arduino documentation<http://arduino.cc/en/Guide/Libraries>`_.
+described in the `Arduino documentation <http://arduino.cc/en/Guide/Libraries>`_.
 
 Usage
 -----
 
-At the top of your sketch you must include the **EventManager header** file::
+At the top of your sketch you must include the **EventManager** header file::
 
     #include <EventManager.h>
     
-And then at global scope you should instantiate an EventManager object::
+And then at global scope you should instantiate an **EventManager** object::
 
     EventManager gMyEventManager;
     
@@ -125,8 +125,7 @@ You add listeners using the ``addListener()`` function::
     
     void setup()
     {
-        gMyEventManager.addListener( EventManager::kEventUser0,
-myListenerFunction );
+        gMyEventManager.addListener( EventManager::kEventUser0, myListenerFunction );
         
         // Do more set up
     }
@@ -222,8 +221,7 @@ priority when you queue the event.  By default, events are considered low
 priority.  You indicate an event is high priority by passing an additional
 constant to ``queueEvent()``, like so::
 
-    gMyEventManager.queueEvent( EventManager::kEventUser0, 0,
-EventManager::kHighPriority );
+    gMyEventManager.queueEvent( EventManager::kEventUser0, 0, EventManager::kHighPriority );
     
 The difference between high and low priority events is that ``processEvent()``
 will process a high priority event ahead of any low priority
@@ -298,17 +296,17 @@ There are various class functions for managing the listeners:
     - You can remove listeners (``removeListener()``), 
     - Disable and enable specific listeners (``enableListener()``), 
     - Set a default listener that will handle any events not handled by other
-listeners and manipulate the default listener just like any other listener
-(``setDefaultListener()``, ``removeDefaultListener()``, and
-``enableDefaultListener()``)
+        listeners and manipulate the default listener just like any other listener
+        (``setDefaultListener()``, ``removeDefaultListener()``, and
+        ``enableDefaultListener()``)
     - Check the status of the listener list (``isListenerListEmpty()``,
-``isListenerListFull()``)
+        ``isListenerListFull()``)
     
 There are various class functions that provide information about the event
 queue:
 
     - Check the status of the event queue (``isEventQueueEmpty()``,
-``isEventQueueFull()``)
+        ``isEventQueueFull()``)
     - See how many events are in the queue (``getNumEventsInQueue()``)
     
 For details on these functions you should review *EventManager.h*.
@@ -344,7 +342,7 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 
-A copy of the license is included in the EventManager package.
+A copy of the license is included in the **EventManager** package.
 
 
 Copyright
