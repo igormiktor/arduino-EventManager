@@ -39,11 +39,15 @@
 
 // Size of the listener list.  Adjust as appropriate for your application.
 // Requires a total of sizeof(*f())+sizeof(int)+sizeof(boolean) bytes of RAM for each unit of size 
+#ifndef EVENTMANAGER_LISTENER_LIST_SIZE
 #define EVENTMANAGER_LISTENER_LIST_SIZE		8
+#endif
 
 // Size of the event two queues.  Adjust as appropriate for your application.
 // Requires a total of 4 * sizeof(int) bytes of RAM for each unit of size 
+#ifndef EVENTMANAGER_EVENT_QUEUE_SIZE
 #define EVENTMANAGER_EVENT_QUEUE_SIZE		8
+#endif
 
 class EventManager 
 {
@@ -116,21 +120,21 @@ public:
         // Serial event, example: a new char is available
         // param: the return value of Serial.read()
         kEventSerial,
-		
-		// User events
-		kEventUser0,
-		kEventUser1,
-		kEventUser2,
-		kEventUser3,
-		kEventUser4,
-		kEventUser5,
-		kEventUser6,
-		kEventUser7,
-		kEventUser8,
-		kEventUser9,
         
         // LCD screen needs to be refreshed
-        kEventPaint
+        kEventPaint,
+
+        // User events
+        kEventUser0,
+        kEventUser1,
+        kEventUser2,
+        kEventUser3,
+        kEventUser4,
+        kEventUser5,
+        kEventUser6,
+        kEventUser7,
+        kEventUser8,
+        kEventUser9     
     };
 
     
@@ -185,7 +189,12 @@ public:
     boolean queueEvent( int eventCode, int eventParam, EventPriority pri = kLowPriority );
 
     // this must be called regularly (usually by calling it inside the loop() function)
-    int processEvents();
+    int processEvent();
+
+    // this function can be called to process ALL events in the queue
+    // WARNING:  if interrupts are adding events as fast as they are being processed
+    // this function might never return.  YOU HAVE BEEN WARNED.
+    int processAllEvents();
 
 
 private:  
