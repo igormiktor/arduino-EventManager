@@ -132,7 +132,7 @@ int EventManager::processAllEvents()
 
 
 EventManager::ListenerList::ListenerList() : 
-mNumListeners( 0 )
+mNumListeners( 0 ), mDefaultCallback( 0 )
 {
 }
 
