@@ -52,6 +52,22 @@ void listener( int event, int pin )
     gPins[pin].lastToggled = millis();
 }
 
+class C
+{
+  int v;
+public:
+  C(int _v):v(_v) {};
+  void f(int a, int b){
+    Serial.print("member function called, value is ");
+    Serial.println(v);
+  };
+};
+
+C c(2);
+MemberFunctionCallable<C> listenerMemberFunction(c,&C::f);
+
+GenericCallable<void(int,int)> listenerFreeFunction(listener);
+
 
 
 void setup() 
@@ -62,7 +78,8 @@ void setup()
     pinMode( gPins[1].pinNbr, OUTPUT );
     
     // Add our listener
-    gEM.addListener( EventManager::kEventUser0, listener );
+    gEM.addListener( EventManager::kEventUser0, &listenerFreeFunction );
+    gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction );
 }
 
 
