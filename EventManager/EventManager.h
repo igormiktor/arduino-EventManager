@@ -69,14 +69,17 @@ public:
 template<class C>
 class MemberFunctionCallable : public EventListener
 {
-    C& obj;
     typedef void (C::*memberf_pointer)(int, int);
-    memberf_pointer f;
 public:
-    MemberFunctionCallable(C& _obj,memberf_pointer _f):obj(_obj),f(_f) {};
+    MemberFunctionCallable() {};
+    MemberFunctionCallable(C* _obj,memberf_pointer _f):obj(_obj),f(_f) {};
+
+    C* obj;
+    memberf_pointer f;
+
     virtual void operator()( int eventCode, int eventParam )
     {
-        obj.f(eventCode,eventParam);
+        ((*obj).*f) (eventCode,eventParam);
     };    
 
 };
