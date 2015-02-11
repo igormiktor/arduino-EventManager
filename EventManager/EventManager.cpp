@@ -136,6 +136,15 @@ mNumListeners( 0 ), mDefaultCallback( 0 )
 {
 }
 
+int EventManager::ListenerList::numListeners()
+{
+    return mNumListeners;
+};
+
+int EventManager::numListeners()
+{
+    return mListeners.numListeners();
+};
 
 boolean EventManager::ListenerList::addListener( int eventCode, EventListener* listener ) 
 {
@@ -193,8 +202,8 @@ boolean EventManager::ListenerList::removeListener( int eventCode, EventListener
         mListeners[ i ].callback  = mListeners[ i + 1 ].callback;
         mListeners[ i ].eventCode = mListeners[ i + 1 ].eventCode;
         mListeners[ i ].enabled   = mListeners[ i + 1 ].enabled;
-        mNumListeners--;
     }
+    mNumListeners--;
      
     EVTMGR_DEBUG_PRINTLN( "removeListener() removed" )
     
@@ -209,24 +218,25 @@ int EventManager::ListenerList::removeListener( EventListener* listener )
 
     if ( mNumListeners == 0 ) 
     {
-        EVTMGR_DEBUG_PRINTLN( "removeListener() no listeners" )
+        EVTMGR_DEBUG_PRINTLN( "  removeListener() no listeners" )
         return 0;
     }
     
     int removed = 0;
-    while ( int k = searchListeners( listener ) >= 0 )
+    int k;
+    while ((k = searchListeners( listener )) >= 0 )
     {
         for ( int i = k; i < mNumListeners - 1; i++ ) 
         {
             mListeners[ i ].callback  = mListeners[ i + 1 ].callback;
             mListeners[ i ].eventCode = mListeners[ i + 1 ].eventCode;
             mListeners[ i ].enabled   = mListeners[ i + 1 ].enabled;
-            mNumListeners--;
-            removed++;
         }
-    }
+        mNumListeners--;
+        removed++;
+   }
     
-    EVTMGR_DEBUG_PRINT( "removeListener() removed " )
+    EVTMGR_DEBUG_PRINT( "  removeListener() removed " )
     EVTMGR_DEBUG_PRINTLN( removed )
     
     return removed;
@@ -353,8 +363,11 @@ void EventManager::ListenerList::enableDefaultListener( boolean enable )
 
 int EventManager::ListenerList::searchListeners( int eventCode, EventListener* listener ) 
 {
+    
     for ( int i = 0; i < mNumListeners; i++ ) 
     {
+
+
         if ( ( mListeners[i].eventCode == eventCode ) && ( mListeners[i].callback == listener ) ) 
         {
             return i;

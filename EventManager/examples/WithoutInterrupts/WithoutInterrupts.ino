@@ -50,6 +50,7 @@ void listener( int event, int pin )
     gPins[pin].pinState = gPins[pin].pinState ? false : true;
     digitalWrite( gPins[pin].pinNbr, gPins[pin].pinState ? HIGH : LOW  );
     gPins[pin].lastToggled = millis();
+    Serial.println("free function called");
 }
 
 class C
@@ -83,14 +84,39 @@ void setup()
 
 
   // Add our listener
-  gEM.addListener( EventManager::kEventUser0, &listenerFreeFunction );
   gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction1 );
+  gEM.addListener( EventManager::kEventUser0, &listenerFreeFunction );
   gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction2 );
+  Serial.print("listeners number:");
+  Serial.println(gEM.numListeners());
 }
 
 
+uint32_t loopCount=0;
+
 void loop() 
 {
+  loopCount++;
+
+
+
+  switch (loopCount)
+  {
+    case 100000:
+      gEM.removeListener( &listenerMemberFunction1);
+      Serial.print("(case 1000000)listeners number:");
+      Serial.println(gEM.numListeners());
+      break;
+    // case 20000:
+    //   gEM.removeListener( &listenerMemberFunction2);
+    //   break;
+    // case 30000:
+    //   gEM.removeListener( &listenerMemberFunction1);
+    //   break;
+
+
+  }
+
     // Handle any events that are in the queue
     gEM.processEvent();
     
@@ -106,7 +132,7 @@ void addPin0Events()
 {
     if ( ( millis() - gPins[0].lastToggled ) > 1000 )
     {
-	gEM.queueEvent( EventManager::kEventUser0, 0 );
+        gEM.queueEvent( EventManager::kEventUser0, 0 );
     }
 }
 
@@ -116,7 +142,10 @@ void addPin1Events()
 {
     if ( ( millis() - gPins[1].lastToggled ) > 3000 )
     {
-	gEM.queueEvent( EventManager::kEventUser0, 1 );
+	     gEM.queueEvent( EventManager::kEventUser0, 1 );
+         Serial.print("(addPin1Events)listeners number:");
+         Serial.println(gEM.numListeners());
+
     }
 }
 

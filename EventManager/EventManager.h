@@ -84,8 +84,6 @@ public:
 
 };
 
-
-
 class EventManager 
 {
 
@@ -208,6 +206,8 @@ public:
     
     // Is the ListenerList full?
     boolean isListenerListFull();
+
+    int numListeners();
     
     // Returns true if no events are in the queue
     boolean isEventQueueEmpty( EventPriority pri = kLowPriority );
@@ -334,6 +334,8 @@ private:
         
         // Send an event to the listeners; returns number of listeners that handled the event
         int sendEvent( int eventCode, int param );
+
+        int numListeners();
 
     private:
     
