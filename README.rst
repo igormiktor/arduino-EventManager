@@ -3,25 +3,25 @@ Arduino EventManager
 ====================
 
 Using an event-driven design is a common way to code Arduino projects that
-interact with the environment around them.  **EventManager** is 
+interact with the environment around them.  **EventManager** is
 a single C++ class that provides an event handling system for Arduino.  With
-**EventManager** you can register functions that "listen" 
+**EventManager** you can register functions that "listen"
 for particular events and when things happen you can "post" events to
 **EventManager**.  You then use the loop() function to regularly tell
 **EventManager** to process  events and the appropriate listeners will be
-called. 
+called.
 
 **EventManger** is designed to be interrupt safe, so that you can post events
-from interrupt handlers.  The corresponding listeners will be 
+from interrupt handlers.  The corresponding listeners will be
 called from outside the interrupt handler it your loop() function when you tell
-**EventManager** to process events.  
+**EventManager** to process events.
 
 In keeping with the limited resources of an Arduino system, **EventManager** is
-light-weight.  There is no dynamic memory allocation.  Event 
+light-weight.  There is no dynamic memory allocation.  Event
 queuing is very fast (so you can be comfortable queuing events from interrupt
 handlers).  To keep the footprint minimal, the event queue
 the listener list are both small (although you can make them bigger if needed).
- 
+
 
 Installation
 ------------
@@ -35,15 +35,15 @@ Usage
 At the top of your sketch you must include the **EventManager** header file::
 
     #include <EventManager.h>
-    
+
 And then at global scope you should instantiate an **EventManager** object::
 
     EventManager gMyEventManager;
-    
+
 You can safely instantiate more than one **EventManager** object, if so desired,
 but the two objects will be completely independent.  This might be useful if
 perhaps you need to have separate event processes in different components of
-your code.  
+your code.
 
 Events
 ~~~~~~
@@ -88,8 +88,8 @@ identify events::
     EventManager::kEventUser6
     EventManager::kEventUser7
     EventManager::kEventUser8
-    EventManager::kEventUser9  
-        
+    EventManager::kEventUser9
+
 These are purely for your convenience; **EventManager** only uses the value to
 match events to listeners, so you are free to use any event codes you wish.  The
 event parameter is also whatever you want it to be: for a key press event it
@@ -100,9 +100,9 @@ to every listener that is associated with that event code.
 You post events using the ``queueEvent()`` function::
 
     gMyEventManager.queueEvent( EventManager::kEventUser0, 1234 );
-    
+
 The ``queueEvent()`` function is lightweight and interrupt safe, so you can call
-it from inside an interrupt handle.  
+it from inside an interrupt handle.
 
 By default the event queue holds 8 events, but you can make the queue any size
 you want by defining the macro ``EVENTMANAGER_EVENT_QUEUE_SIZE`` to whatever
@@ -112,24 +112,31 @@ value you desire *before* you ``#include<EventManager.h>``.
 Listeners
 ~~~~~~~~~
 
-Listeners are functions of type::
+Listeners are functions of type:
 
     typedef void ( *EventListener )( int eventCode, int eventParam );
 
+or they can be callable member functions (if you don't know what these are, don't
+worry about it; if you do, you know enough to read the headers and example code
+to learn the details.
+
 You add listeners using the ``addListener()`` function::
-        
-    void myListenerFunction( int eventCode, int eventParam ) 
+
+    void myListenerFunction( int eventCode, int eventParam )
     {
         // Do something with the event
     }
-    
+
+    // Slight complication to provide the flexibility to also accept callable member functions
+    GenericCallable<void(int,int)> myListener( myListenerFunction );
+
     void setup()
     {
-        gMyEventManager.addListener( EventManager::kEventUser0, myListenerFunction );
-        
+        gMyEventManager.addListener( EventManager::kEventUser0, &myListener );
+
         // Do more set up
     }
-    
+
 Do *not* add listeners from within an interrupt routine.  By default the list of
 listeners holds 8 listeners, but you can make the list any size you want by
 defining the macro ``EVENTMANAGER_LISTENER_LIST_SIZE`` to whatever value you
@@ -143,9 +150,9 @@ call the ``processEvent()`` function::
 
     void loop()
     {
-        gMyEventManager.processEvent(); 
+        gMyEventManager.processEvent();
     }
-    
+
 The standard usage is to call ``processEvent()`` once in your ``loop()``
 function so that one event is handled every time through the loop. This is
 normally more than adequate to keep up with incoming events.  Events are
@@ -175,23 +182,26 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
         lastToggled = millis();
     }
 
-    void setup() 
-    {                
+    // Convert the lister function into a more generic form
+    GenericCallable<void(int,int)> listenerObject( listener );
+
+    void setup()
+    {
         // Setup
         pinMode( 13, OUTPUT );
         digitalWrite( 13, HIGH );
         pin13State = true;
         lastToggled = millis()
-        
+
         // Add our listener
-        gEM.addListener( EventManager::kEventUser0, listener );
+        gEM.addListener( EventManager::kEventUser0, &listenerObject );
     }
 
-    void loop() 
+    void loop()
     {
         // Handle any events that are in the queue
         gEM.processEvent();
-        
+
         // Add events into the queue
         addPinEvents();
      }
@@ -222,15 +232,15 @@ priority.  You indicate an event is high priority by passing an additional
 constant to ``queueEvent()``, like so::
 
     gMyEventManager.queueEvent( EventManager::kEventUser0, 0, EventManager::kHighPriority );
-    
+
 The difference between high and low priority events is that ``processEvent()``
 will process a high priority event ahead of any low priority
 events.  In effect, high priority events jump to the front of the queue (but
-multiple high priority events are processed first-in, 
+multiple high priority events are processed first-in,
 first-out, but all of them before any low priority events).
 
 Note that if high priority events are queued faster than low priority events,
-EventManager may never get to processing any of the low priority 
+EventManager may never get to processing any of the low priority
 events.  So use high priority events judiciously.
 
 Interrupt Safety
@@ -268,10 +278,10 @@ Define ``EVENTMANAGER_EVENT_QUEUE_SIZE`` to whatever size you need *before*
 including `EventManager.h`, like so::
 
     #define EVENTMANAGER_EVENT_QUEUE_SIZE   16
-    
+
     #include <EventManager.h>
-    
-The event queue requires ``4*sizeof(int) = 8`` bytes for each unit of size. 
+
+The event queue requires ``4*sizeof(int) = 8`` bytes for each unit of size.
 There is a factor of 4 (instead of 2) because internally **EventManager**
 maintains two separate queues: a high-priority queue and a low-priority queue.
 
@@ -282,28 +292,28 @@ Define ``EVENTMANAGER_LISTENER_LIST_SIZE`` to whatever size you need *before*
 including `EventManager.h`, like so::
 
     #define EVENTMANAGER_LISTENER_LIST_SIZE   16
-    
+
     #include <EventManager.h>
-    
+
 The listener list requires ``sizeof(*f()) + sizeof(int) + sizeof(boolean) = 5``
-bytes for each unit of size.  
+bytes for each unit of size.
 
 Additional Features
 ~~~~~~~~~~~~~~~~~~~
 
-There are various class functions for managing the listeners: 
+There are various class functions for managing the listeners:
 
-    - You can remove listeners (``removeListener()``), 
-    - Disable and enable specific listeners (``enableListener()``), 
+    - You can remove listeners (``removeListener()``),
+    - Disable and enable specific listeners (``enableListener()``),
     - Set a default listener that will handle any events not handled by other listeners and manipulate the default listener just like any other listener (``setDefaultListener()``, ``removeDefaultListener()``, and ``enableDefaultListener()``)
     - Check the status of the listener list (``isListenerListEmpty()``, ``isListenerListFull()``)
-    
+
 There are various class functions that provide information about the event
 queue:
 
     - Check the status of the event queue (``isEventQueueEmpty()``, ``isEventQueueFull()``)
     - See how many events are in the queue (``getNumEventsInQueue()``)
-    
+
 For details on these functions you should review *EventManager.h*.
 
 Feedback
