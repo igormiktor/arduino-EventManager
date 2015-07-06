@@ -171,10 +171,10 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
     #include <Arduino.h>
     #include <EventManager.h>
 
-    boolean pin13state;
+    boolean pin13State;
     unsigned long lastToggled;
 
-    EventManager gEM();
+    EventManager gEM;
 
     // Our listener will simply toggle the state of pin 13
     void listener( int event, int param )
@@ -194,7 +194,7 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
         pinMode( 13, OUTPUT );
         digitalWrite( 13, HIGH );
         pin13State = true;
-        lastToggled = millis()
+        lastToggled = millis();
 
         // Add our listener
         gEM.addListener( EventManager::kEventUser0, &listenerObject );
