@@ -13,13 +13,13 @@ called.
 
 **EventManger** is designed to be interrupt safe, so that you can post events
 from interrupt handlers.  The corresponding listeners will be
-called from outside the interrupt handler it your loop() function when you tell
+called from outside the interrupt handler in your loop() function when you tell
 **EventManager** to process events.
 
 In keeping with the limited resources of an Arduino system, **EventManager** is
 light-weight.  There is no dynamic memory allocation.  Event
 queuing is very fast (so you can be comfortable queuing events from interrupt
-handlers).  To keep the footprint minimal, the event queue
+handlers).  To keep the footprint minimal, the event queue and
 the listener list are both small (although you can make them bigger if needed).
 
 
@@ -102,7 +102,7 @@ You post events using the ``queueEvent()`` function::
     gMyEventManager.queueEvent( EventManager::kEventUser0, 1234 );
 
 The ``queueEvent()`` function is lightweight and interrupt safe, so you can call
-it from inside an interrupt handle.
+it from inside an interrupt handler.
 
 By default the event queue holds 8 events, but you can make the queue any size
 you want by defining the macro ``EVENTMANAGER_EVENT_QUEUE_SIZE`` to whatever
@@ -118,7 +118,7 @@ Listeners are functions of type:
 
 or they can be callable member functions (if you don't know what these are, don't
 worry about it; if you do, you know enough to read the headers and example code
-to learn the details.
+to learn the details).
 
 You add listeners using the ``addListener()`` function::
 
@@ -137,7 +137,9 @@ You add listeners using the ``addListener()`` function::
         // Do more set up
     }
 
-Do *not* add listeners from within an interrupt routine.  By default the list of
+Do *not* add listeners from within an interrupt routine.
+
+By default the list of
 listeners holds 8 listeners, but you can make the list any size you want by
 defining the macro ``EVENTMANAGER_LISTENER_LIST_SIZE`` to whatever value you
 desire *before* you ``#include<EventManager.h>``.
@@ -145,7 +147,7 @@ desire *before* you ``#include<EventManager.h>``.
 Processing Events
 ~~~~~~~~~~~~~~~~~
 
-To actual process events in the event queue and dispatch them to listeners you
+To actually process events in the event queue and dispatch them to listeners you
 call the ``processEvent()`` function::
 
     void loop()
@@ -153,9 +155,10 @@ call the ``processEvent()`` function::
         gMyEventManager.processEvent();
     }
 
+This call process one event from the event queue every time it is called.
 The standard usage is to call ``processEvent()`` once in your ``loop()``
 function so that one event is handled every time through the loop. This is
-normally more than adequate to keep up with incoming events.  Events are
+usually more than adequate to keep up with incoming events.  Events are
 normally processed in a first-in, first-out fashion (but see the section on
 `Event Priority`_ below).
 
@@ -231,13 +234,13 @@ priority when you queue the event.  By default, events are considered low
 priority.  You indicate an event is high priority by passing an additional
 constant to ``queueEvent()``, like so::
 
-    gMyEventManager.queueEvent( EventManager::kEventUser0, 0, EventManager::kHighPriority );
+    gMyEventManager.queueEvent( EventManager::kEventUser0, 1234, EventManager::kHighPriority );
 
 The difference between high and low priority events is that ``processEvent()``
 will process a high priority event ahead of any low priority
-events.  In effect, high priority events jump to the front of the queue (but
-multiple high priority events are processed first-in,
-first-out, but all of them before any low priority events).
+events.  In effect, high priority events jump to the front of the queue
+(multiple high priority events are processed first-in,
+first-out, but all of them are processed before any low priority events).
 
 Note that if high priority events are queued faster than low priority events,
 EventManager may never get to processing any of the low priority
@@ -248,7 +251,7 @@ Interrupt Safety
 
 **EventManager** was designed to be interrupt safe, so that you can queue events
 both from within interrupt handlers and also from normal functions without
-having to worry about queue corruption.  However, this safety comes at a price
+having to worry about queue corruption.  However, this safety comes at the price
 of slightly slower ``queueEvent()`` and ``processEvent()`` functions and the
 need to globally disable interrupts while certain small snippets of code are
 executing.  If you are not queuing events from interrupt handlers, you can
@@ -257,7 +260,7 @@ mode. You do this by passing a special flag to the constructor::
 
     EventManager gMyEventManager( EventManager::kNotInterruptSafe );
 
-This will save you a few cycle and preclude **EventManager** from ever disabling
+This will save you a few cycles and preclude **EventManager** from ever disabling
 interrupts.
 
 Processing All Events
@@ -353,7 +356,7 @@ A copy of the license is included in the **EventManager** package.
 Copyright
 ~~~~~~~~~
 
-Copyright (c) 2013 Igor Mikolic-Torreira
+Copyright (c) 2015 Igor Mikolic-Torreira
 
 Portions are Copyright (c) 2010 OTTOTECNICA Italy
 
