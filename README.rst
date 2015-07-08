@@ -22,6 +22,12 @@ queuing is very fast (so you can be comfortable queuing events from interrupt
 handlers).  To keep the footprint minimal, the event queue and
 the listener list are both small (although you can make them bigger if needed).
 
+NOTE:  There are two versions of **EventManager**.  The master branch has a version
+of **EventManager** that uses functions as listeners (also known as event handlers).
+Most users will find that this version meets their needs.  The `GenericListeners`
+branch contains a version of **EventManager** that accepts more general types of
+listeners such as callable member functions and callable objects.  If you don't
+know what these are, stick to the master branch.
 
 Installation
 ------------
@@ -116,23 +122,16 @@ Listeners are functions of type:
 
     typedef void ( *EventListener )( int eventCode, int eventParam );
 
-or they can be callable member functions (if you don't know what these are, don't
-worry about it; if you do, you know enough to read the headers and example code
-to learn the details).
-
 You add listeners using the ``addListener()`` function::
 
-    void myListenerFunction( int eventCode, int eventParam )
+    void myListener( int eventCode, int eventParam )
     {
         // Do something with the event
     }
 
-    // Slight complication to provide the flexibility to also accept callable member functions
-    GenericCallable<void(int,int)> myListener( myListenerFunction );
-
     void setup()
     {
-        gMyEventManager.addListener( EventManager::kEventUser0, &myListener );
+        gMyEventManager.addListener( EventManager::kEventUser0, myListener );
 
         // Do more set up
     }
@@ -185,9 +184,6 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
         lastToggled = millis();
     }
 
-    // Convert the lister function into a more generic form
-    GenericCallable<void(int,int)> listenerObject( listener );
-
     void setup()
     {
         // Setup
@@ -197,7 +193,7 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
         lastToggled = millis();
 
         // Add our listener
-        gEM.addListener( EventManager::kEventUser0, &listenerObject );
+        gEM.addListener( EventManager::kEventUser0, listener );
     }
 
     void loop()

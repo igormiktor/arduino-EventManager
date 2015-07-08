@@ -1,4 +1,3 @@
-
 /*
   This sketch assumes an LED on pin 13 (built-in on Arduino Uno) and
   an LED on pin 8.  It blinks boths LED using timer interrupts.
@@ -57,7 +56,7 @@ void interruptHandler()
 
     if ( !oddEven )
     {
-	gEM.queueEvent( EventManager::kEventUser0, 1 );
+        gEM.queueEvent( EventManager::kEventUser0, 1 );
     }
 
     ++oddEven;
@@ -74,9 +73,6 @@ void listener( int event, int pin )
 }
 
 
-GenericCallable<void(int,int)> listenerFreeFunction(listener);
-
-
 void setup()
 {
     // Setup
@@ -85,7 +81,7 @@ void setup()
     pinMode( gPins[1].pinNbr, OUTPUT );
 
     // Add our listener
-    gEM.addListener( EventManager::kEventUser0, &listenerFreeFunction );
+    gEM.addListener( EventManager::kEventUser0, listener );
 
     // Set up interrupts every second
     MsTimer2::set( 1000, interruptHandler ); // 1 sec period

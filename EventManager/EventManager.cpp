@@ -6,8 +6,8 @@
  *
  * Author: igormt@alumni.caltech.edu
  * Copyright (c) 2013 Igor Mikolic-Torreira
- * 
- * Inspired by and adapted from the 
+ *
+ * Inspired by and adapted from the
  * Arduino Event System library by
  * Author: mromani@ottotecnica.com
  * Copyright (c) 2010 OTTOTECNICA Italy
@@ -44,19 +44,19 @@
 #else
 #define EVTMGR_DEBUG_PRINT( x )
 #define EVTMGR_DEBUG_PRINTLN( x )
-#define EVTMGR_DEBUG_PRINT_PTR( x )	
-#define EVTMGR_DEBUG_PRINTLN_PTR( x )	
+#define EVTMGR_DEBUG_PRINT_PTR( x )
+#define EVTMGR_DEBUG_PRINTLN_PTR( x )
 #endif
 
 
-EventManager::EventManager( SafetyMode safety ) : 
-mHighPriorityQueue( ( safety == EventManager::kInterruptSafe ) ), 
+EventManager::EventManager( SafetyMode safety ) :
+mHighPriorityQueue( ( safety == EventManager::kInterruptSafe ) ),
 mLowPriorityQueue( ( safety == EventManager::kInterruptSafe ) )
 {
 }
 
 
-int EventManager::processEvent() 
+int EventManager::processEvent()
 {
     int eventCode;
     int param;
@@ -65,7 +65,7 @@ int EventManager::processEvent()
     if ( mHighPriorityQueue.popEvent( &eventCode, &param ) )
     {
         handledCount = mListeners.sendEvent( eventCode, param );
-        
+
         EVTMGR_DEBUG_PRINT( "processEvent() hi-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
@@ -73,13 +73,13 @@ int EventManager::processEvent()
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
     }
-    
-    // If no high-pri events handled (either because there are no high-pri events or 
+
+    // If no high-pri events handled (either because there are no high-pri events or
     // because there are no listeners for them), then try low-pri events
-    if ( !handledCount && mLowPriorityQueue.popEvent( &eventCode, &param ) ) 
+    if ( !handledCount && mLowPriorityQueue.popEvent( &eventCode, &param ) )
     {
         handledCount = mListeners.sendEvent( eventCode, param );
-        
+
         EVTMGR_DEBUG_PRINT( "processEvent() lo-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
@@ -87,12 +87,12 @@ int EventManager::processEvent()
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
     }
-    
+
     return handledCount;
 }
 
 
-int EventManager::processAllEvents() 
+int EventManager::processAllEvents()
 {
     int eventCode;
     int param;
@@ -101,7 +101,7 @@ int EventManager::processAllEvents()
     while ( mHighPriorityQueue.popEvent( &eventCode, &param ) )
     {
         handledCount += mListeners.sendEvent( eventCode, param );
-        
+
         EVTMGR_DEBUG_PRINT( "processEvent() hi-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
@@ -109,11 +109,11 @@ int EventManager::processAllEvents()
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
     }
-    
-    while ( mLowPriorityQueue.popEvent( &eventCode, &param ) ) 
+
+    while ( mLowPriorityQueue.popEvent( &eventCode, &param ) )
     {
         handledCount += mListeners.sendEvent( eventCode, param );
-        
+
         EVTMGR_DEBUG_PRINT( "processEvent() lo-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
@@ -121,7 +121,7 @@ int EventManager::processAllEvents()
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
     }
-    
+
     return handledCount;
 }
 
@@ -131,7 +131,7 @@ int EventManager::processAllEvents()
 
 
 
-EventManager::ListenerList::ListenerList() : 
+EventManager::ListenerList::ListenerList() :
 mNumListeners( 0 ), mDefaultCallback( 0 )
 {
 }
@@ -146,7 +146,7 @@ int EventManager::numListeners()
     return mListeners.numListeners();
 };
 
-boolean EventManager::ListenerList::addListener( int eventCode, EventListener* listener ) 
+boolean EventManager::ListenerList::addListener( int eventCode, EventListener listener )
 {
     EVTMGR_DEBUG_PRINT( "addListener() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
@@ -154,13 +154,13 @@ boolean EventManager::ListenerList::addListener( int eventCode, EventListener* l
     EVTMGR_DEBUG_PRINTLN_PTR( listener )
 
     // Argument check
-    if ( !listener ) 
+    if ( !listener )
     {
         return false;
     }
 
     // Check for full dispatch table
-    if ( isFull() ) 
+    if ( isFull() )
     {
         EVTMGR_DEBUG_PRINTLN( "addListener() list full" )
         return false;
@@ -172,19 +172,19 @@ boolean EventManager::ListenerList::addListener( int eventCode, EventListener* l
     mNumListeners++;
 
     EVTMGR_DEBUG_PRINTLN( "addListener() listener added" )
-    
+
     return true;
 }
 
 
-boolean EventManager::ListenerList::removeListener( int eventCode, EventListener* listener ) 
+boolean EventManager::ListenerList::removeListener( int eventCode, EventListener listener )
 {
     EVTMGR_DEBUG_PRINT( "removeListener() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
     EVTMGR_DEBUG_PRINT( ", " )
     EVTMGR_DEBUG_PRINTLN_PTR( listener )
-    
-    if ( mNumListeners == 0 ) 
+
+    if ( mNumListeners == 0 )
     {
         EVTMGR_DEBUG_PRINTLN( "removeListener() no listeners" )
         return false;
@@ -197,36 +197,36 @@ boolean EventManager::ListenerList::removeListener( int eventCode, EventListener
         return false;
     }
 
-    for ( int i = k; i < mNumListeners - 1; i++ ) 
+    for ( int i = k; i < mNumListeners - 1; i++ )
     {
         mListeners[ i ].callback  = mListeners[ i + 1 ].callback;
         mListeners[ i ].eventCode = mListeners[ i + 1 ].eventCode;
         mListeners[ i ].enabled   = mListeners[ i + 1 ].enabled;
     }
     mNumListeners--;
-     
+
     EVTMGR_DEBUG_PRINTLN( "removeListener() removed" )
-    
+
     return true;
 }
 
 
-int EventManager::ListenerList::removeListener( EventListener* listener ) 
+int EventManager::ListenerList::removeListener( EventListener listener )
 {
     EVTMGR_DEBUG_PRINT( "removeListener() enter " )
     EVTMGR_DEBUG_PRINTLN_PTR( listener )
 
-    if ( mNumListeners == 0 ) 
+    if ( mNumListeners == 0 )
     {
         EVTMGR_DEBUG_PRINTLN( "  removeListener() no listeners" )
         return 0;
     }
-    
+
     int removed = 0;
     int k;
     while ((k = searchListeners( listener )) >= 0 )
     {
-        for ( int i = k; i < mNumListeners - 1; i++ ) 
+        for ( int i = k; i < mNumListeners - 1; i++ )
         {
             mListeners[ i ].callback  = mListeners[ i + 1 ].callback;
             mListeners[ i ].eventCode = mListeners[ i + 1 ].eventCode;
@@ -235,15 +235,15 @@ int EventManager::ListenerList::removeListener( EventListener* listener )
         mNumListeners--;
         removed++;
    }
-    
+
     EVTMGR_DEBUG_PRINT( "  removeListener() removed " )
     EVTMGR_DEBUG_PRINTLN( removed )
-    
+
     return removed;
 }
 
 
-boolean EventManager::ListenerList::enableListener( int eventCode, EventListener* listener, boolean enable ) 
+boolean EventManager::ListenerList::enableListener( int eventCode, EventListener listener, boolean enable )
 {
     EVTMGR_DEBUG_PRINT( "enableListener() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
@@ -252,14 +252,14 @@ boolean EventManager::ListenerList::enableListener( int eventCode, EventListener
     EVTMGR_DEBUG_PRINT( ", " )
     EVTMGR_DEBUG_PRINTLN( enable )
 
-    if ( mNumListeners == 0 ) 
+    if ( mNumListeners == 0 )
     {
         EVTMGR_DEBUG_PRINTLN( "enableListener() no listeners" )
         return false;
     }
 
     int k = searchListeners( eventCode, listener );
-    if ( k < 0 ) 
+    if ( k < 0 )
     {
         EVTMGR_DEBUG_PRINTLN( "enableListener() not found fail" )
         return false;
@@ -272,15 +272,15 @@ boolean EventManager::ListenerList::enableListener( int eventCode, EventListener
 }
 
 
-boolean EventManager::ListenerList::isListenerEnabled( int eventCode, EventListener* listener ) 
+boolean EventManager::ListenerList::isListenerEnabled( int eventCode, EventListener listener )
 {
-    if ( mNumListeners == 0 ) 
+    if ( mNumListeners == 0 )
     {
         return false;
     }
 
     int k = searchListeners( eventCode, listener );
-    if ( k < 0 ) 
+    if ( k < 0 )
     {
         return false;
     }
@@ -289,7 +289,7 @@ boolean EventManager::ListenerList::isListenerEnabled( int eventCode, EventListe
 }
 
 
-int EventManager::ListenerList::sendEvent( int eventCode, int param ) 
+int EventManager::ListenerList::sendEvent( int eventCode, int param )
 {
     EVTMGR_DEBUG_PRINT( "sendEvent() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
@@ -297,28 +297,28 @@ int EventManager::ListenerList::sendEvent( int eventCode, int param )
     EVTMGR_DEBUG_PRINTLN( param )
 
     int handlerCount = 0;
-    for ( int i = 0; i < mNumListeners; i++ ) 
+    for ( int i = 0; i < mNumListeners; i++ )
     {
-        if ( ( mListeners[ i ].callback != 0 ) && ( mListeners[ i ].eventCode == eventCode ) && mListeners[ i ].enabled ) 
+        if ( ( mListeners[ i ].callback != 0 ) && ( mListeners[ i ].eventCode == eventCode ) && mListeners[ i ].enabled )
         {
             handlerCount++;
             (*mListeners[ i ].callback)( eventCode, param );
         }
     }
-    
+
     EVTMGR_DEBUG_PRINT( "sendEvent() sent to " )
     EVTMGR_DEBUG_PRINTLN( handlerCount )
 
-    if ( !handlerCount ) 
+    if ( !handlerCount )
     {
-        if ( ( mDefaultCallback != 0 ) && mDefaultCallbackEnabled ) 
+        if ( ( mDefaultCallback != 0 ) && mDefaultCallbackEnabled )
         {
             handlerCount++;
             (*mDefaultCallback)( eventCode, param );
-            
+
             EVTMGR_DEBUG_PRINTLN( "sendEvent() event sent to default" )
         }
-	
+
 #if EVENTMANAGER_DEBUG
         else
         {
@@ -327,17 +327,17 @@ int EventManager::ListenerList::sendEvent( int eventCode, int param )
 #endif
 
     }
-    
+
     return handlerCount;
 }
 
 
-boolean EventManager::ListenerList::setDefaultListener( EventListener* listener ) 
+boolean EventManager::ListenerList::setDefaultListener( EventListener listener )
 {
     EVTMGR_DEBUG_PRINT( "setDefaultListener() enter " )
     EVTMGR_DEBUG_PRINTLN_PTR( listener )
-    
-    if ( listener == 0 ) 
+
+    if ( listener == 0 )
     {
         return false;
     }
@@ -348,27 +348,27 @@ boolean EventManager::ListenerList::setDefaultListener( EventListener* listener 
 }
 
 
-void EventManager::ListenerList::removeDefaultListener() 
+void EventManager::ListenerList::removeDefaultListener()
 {
     mDefaultCallback = 0;
     mDefaultCallbackEnabled = false;
 }
 
 
-void EventManager::ListenerList::enableDefaultListener( boolean enable ) 
+void EventManager::ListenerList::enableDefaultListener( boolean enable )
 {
     mDefaultCallbackEnabled = enable;
 }
 
 
-int EventManager::ListenerList::searchListeners( int eventCode, EventListener* listener ) 
+int EventManager::ListenerList::searchListeners( int eventCode, EventListener listener )
 {
-    
-    for ( int i = 0; i < mNumListeners; i++ ) 
+
+    for ( int i = 0; i < mNumListeners; i++ )
     {
 
 
-        if ( ( mListeners[i].eventCode == eventCode ) && ( mListeners[i].callback == listener ) ) 
+        if ( ( mListeners[i].eventCode == eventCode ) && ( mListeners[i].callback == listener ) )
         {
             return i;
         }
@@ -378,11 +378,11 @@ int EventManager::ListenerList::searchListeners( int eventCode, EventListener* l
 }
 
 
-int EventManager::ListenerList::searchListeners( EventListener* listener ) 
+int EventManager::ListenerList::searchListeners( EventListener listener )
 {
-    for ( int i = 0; i < mNumListeners; i++ ) 
+    for ( int i = 0; i < mNumListeners; i++ )
     {
-        if ( mListeners[i].callback == listener ) 
+        if ( mListeners[i].callback == listener )
         {
             return i;
         }
@@ -392,11 +392,11 @@ int EventManager::ListenerList::searchListeners( EventListener* listener )
 }
 
 
-int EventManager::ListenerList::searchEventCode( int eventCode ) 
+int EventManager::ListenerList::searchEventCode( int eventCode )
 {
-    for ( int i = 0; i < mNumListeners; i++ ) 
+    for ( int i = 0; i < mNumListeners; i++ )
     {
-        if ( mListeners[i].eventCode == eventCode ) 
+        if ( mListeners[i].eventCode == eventCode )
         {
             return i;
         }
@@ -413,12 +413,12 @@ int EventManager::ListenerList::searchEventCode( int eventCode )
 
 
 EventManager::EventQueue::EventQueue( boolean beSafe ) :
-mEventQueueHead( 0 ), 
-mEventQueueTail( 0 ), 
-mNumEvents( 0 ), 
+mEventQueueHead( 0 ),
+mEventQueueTail( 0 ),
+mNumEvents( 0 ),
 mInterruptSafeMode( beSafe )
 {
-    for ( int i = 0; i < kEventQueueSize; i++ ) 
+    for ( int i = 0; i < kEventQueueSize; i++ )
     {
         mEventQueue[i].code = EventManager::kEventNone;
         mEventQueue[i].param = 0;
@@ -427,33 +427,33 @@ mInterruptSafeMode( beSafe )
 
 
 
-boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam ) 
-{  
+boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
+{
     /*
-    * The call to noInterrupts() MUST come BEFORE the full queue check.  
-    * 
+    * The call to noInterrupts() MUST come BEFORE the full queue check.
+    *
     * If the call to isFull() returns FALSE but an asynchronous interrupt queues
     * an event, making the queue full, before we finish inserting here, we will then
-    * corrupt the queue (we'll add an event to an already full queue). So the entire 
-    * operation, from the call to isFull() to completing the inserting (if not full) 
+    * corrupt the queue (we'll add an event to an already full queue). So the entire
+    * operation, from the call to isFull() to completing the inserting (if not full)
     * must be atomic.
-    * 
+    *
     * Note that this race condition can only arise IF both interrupt and non-interrupt (normal)
     * code add events to the queue.  If only normal code adds events, this can't happen
     * because then there are no asynchronous additions to the queue.  If only interrupt
-    * handlers add events to the queue, this can't happen because further interrupts are 
+    * handlers add events to the queue, this can't happen because further interrupts are
     * blocked while an interrupt handler is executing.  This race condition can only happen
-    * when an event is added to the queue by normal (non-interrupt) code and simultaneously 
-    * an interrupt handler tries to add an event to the queue.  This is the case that the 
+    * when an event is added to the queue by normal (non-interrupt) code and simultaneously
+    * an interrupt handler tries to add an event to the queue.  This is the case that the
     * cli() (= noInterrupts()) call protects against.
-    * 
+    *
     * Contrast this with the logic in popEvent().
-    * 
+    *
     */
 
-    // Because this function may be called from interrupt handlers, debugging is 
+    // Because this function may be called from interrupt handlers, debugging is
     // only available in when NOT in interrupt safe mode.
-    
+
 #if EVENTMANAGER_DEBUG
     if ( !mInterruptSafeMode )
     {
@@ -472,10 +472,10 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
         sregSave = SREG;
         cli();
     }
-    
+
     // ATOMIC BLOCK BEGIN (only atomic **if** mInterruptSafeMode is on)
     boolean retVal = false;
-    if ( !isFull() ) 
+    if ( !isFull() )
     {
         // Store the event at the tail of the queue
         mEventQueue[ mEventQueueTail ].code = eventCode;
@@ -492,8 +492,8 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
     // ATOMIC BLOCK END
 
     if ( mInterruptSafeMode )
-    {   
-        // Restore previous state of interrupts 
+    {
+        // Restore previous state of interrupts
         __iRestore( &sregSave );
     }
 
@@ -509,32 +509,32 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
 }
 
 
-boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam ) 
+boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
 {
     /*
-    * The call to noInterrupts() MUST come AFTER the empty queue check.  
-    * 
-    * There is no harm if the isEmpty() call returns an "incorrect" TRUE response because 
-    * an asynchronous interrupt queued an event after isEmpty() was called but before the 
-    * return is executed.  We'll pick up that asynchronously queued event the next time 
-    * popEvent() is called. 
-    * 
-    * If noInterrupts() is set before the isEmpty() check, we pretty much lock-up the Arduino.  
+    * The call to noInterrupts() MUST come AFTER the empty queue check.
+    *
+    * There is no harm if the isEmpty() call returns an "incorrect" TRUE response because
+    * an asynchronous interrupt queued an event after isEmpty() was called but before the
+    * return is executed.  We'll pick up that asynchronously queued event the next time
+    * popEvent() is called.
+    *
+    * If noInterrupts() is set before the isEmpty() check, we pretty much lock-up the Arduino.
     * This is because popEvent(), via processEvents(), is normally called inside loop(), which
     * means it is called VERY OFTEN.  Most of the time (>99%), the event queue will be empty.
-    * But that means that we'll have interrupts turned off for a significant fraction of the 
-    * time.  We don't want to do that.  We only want interrupts turned off when we are 
+    * But that means that we'll have interrupts turned off for a significant fraction of the
+    * time.  We don't want to do that.  We only want interrupts turned off when we are
     * actually manipulating the queue.
-    * 
+    *
     * Contrast this with the logic in queueEvent().
-    * 
+    *
     */
 
-    if ( isEmpty() ) 
+    if ( isEmpty() )
     {
         return false;
     }
-    
+
     if ( mInterruptSafeMode )
     {
         EVTMGR_DEBUG_PRINTLN( "popEvent() interrupts off" )
@@ -548,7 +548,7 @@ boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
 
     // Clear the event (paranoia)
     mEventQueue[ mEventQueueHead ].code = EventManager::kEventNone;
-    
+
     // Update the queue head value
     mEventQueueHead = ( mEventQueueHead + 1 ) % kEventQueueSize;
 

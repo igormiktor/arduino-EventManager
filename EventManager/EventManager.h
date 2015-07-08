@@ -6,8 +6,8 @@
  *
  * Author: igormt@alumni.caltech.edu
  * Copyright (c) 2013 Igor Mikolic-Torreira
- * 
- * Inspired by and adapted from the 
+ *
+ * Inspired by and adapted from the
  * Arduino Event System library by
  * Author: mromani@ottotecnica.com
  * Copyright (c) 2010 OTTOTECNICA Italy
@@ -38,62 +38,30 @@
 #include <Arduino.h>
 
 // Size of the listener list.  Adjust as appropriate for your application.
-// Requires a total of sizeof(*f())+sizeof(int)+sizeof(boolean) bytes of RAM for each unit of size 
+// Requires a total of sizeof(*f())+sizeof(int)+sizeof(boolean) bytes of RAM for each unit of size
 #ifndef EVENTMANAGER_LISTENER_LIST_SIZE
 #define EVENTMANAGER_LISTENER_LIST_SIZE		8
 #endif
 
 // Size of the event two queues.  Adjust as appropriate for your application.
-// Requires a total of 4 * sizeof(int) bytes of RAM for each unit of size 
+// Requires a total of 4 * sizeof(int) bytes of RAM for each unit of size
 #ifndef EVENTMANAGER_EVENT_QUEUE_SIZE
 #define EVENTMANAGER_EVENT_QUEUE_SIZE		8
 #endif
 
-class EventListener{
-public:
-    virtual void operator()( int eventCode, int eventParam )=0;
-};
 
-template<typename F>
-class GenericCallable : public EventListener
-{
-    F* f;
-public:
-    GenericCallable(F _f): f(_f) {};
-    virtual void operator()( int eventCode, int eventParam )
-    {
-        f(eventCode,eventParam);
-    };  
-};
-
-template<class C>
-class MemberFunctionCallable : public EventListener
-{
-    typedef void (C::*memberf_pointer)(int, int);
-public:
-    MemberFunctionCallable() {};
-    MemberFunctionCallable(C* _obj,memberf_pointer _f):obj(_obj),f(_f) {};
-
-    C* obj;
-    memberf_pointer f;
-
-    virtual void operator()( int eventCode, int eventParam )
-    {
-        ((*obj).*f) (eventCode,eventParam);
-    };    
-
-};
-
-class EventManager 
+class EventManager
 {
 
 public:
-    
-   
-    // EventManager can be instantiated in either as interrupt safe or 
-    // non-interupt safe configuration.  The default is interrupt safe, but 
+
+    // Type for an event listener (a.k.a. callback) function
+    typedef void ( *EventListener )( int eventCode, int eventParam );
+
+    // EventManager can be instantiated in either as interrupt safe or
+    // non-interupt safe configuration.  The default is interrupt safe, but
     // these constants can be used to explicitly set the configuration.
-    // If you queue events from an interrupt handler, you must instantiate  
+    // If you queue events from an interrupt handler, you must instantiate
     // the EventManager in interrupt safe mode.
     enum SafetyMode { kNotInterruptSafe, kInterruptSafe };
 
@@ -103,33 +71,33 @@ public:
     //
     // NOTE high priority events are always handled before any low priority events.
     enum EventPriority { kHighPriority, kLowPriority };
-    
-    // Various pre-defined event type codes.  These are completely optional and 
+
+    // Various pre-defined event type codes.  These are completely optional and
     // provided for convenience.  Any integer value can be used as an event code.
-    enum EventType 
+    enum EventType
     {
         // No event occurred; param: none
         kEventNone = 200,
-        
+
         // A key was pressed;  param: key code
         kEventKeyPress,
-        
+
         // A key was released;  param: key code
         kEventKeyRelease,
-        
+
         // Use this to notify a character;  param: the character to be notified
         kEventChar,
-        
+
         // Generic time event
         // param: a time value (exact meaning is defined by the code inserting this event into the queue)
         kEventTime,
-        
+
         // Generic timer events; param: same as EV_TIME
         kEventTimer0,
         kEventTimer1,
         kEventTimer2,
         kEventTimer3,
-        
+
         // Analog read (last number = analog channel);  param: value read
         kEventAnalog0,
         kEventAnalog1,
@@ -137,7 +105,7 @@ public:
         kEventAnalog3,
         kEventAnalog4,
         kEventAnalog5,
-        
+
         // Menu events
         kEventMenu0,
         kEventMenu1,
@@ -153,7 +121,7 @@ public:
         // Serial event, example: a new char is available
         // param: the return value of Serial.read()
         kEventSerial,
-        
+
         // LCD screen needs to be refreshed
         kEventPaint,
 
@@ -167,48 +135,48 @@ public:
         kEventUser6,
         kEventUser7,
         kEventUser8,
-        kEventUser9     
+        kEventUser9
     };
 
-    
+
     // Create an event manager
     // By default, it operates in interrupt safe mode, allowing you to queue events from interrupt handlers
     EventManager( SafetyMode safety = kInterruptSafe );
 
     // Add a listener
     // Returns true if the listener is successfully installed, false otherwise (e.g. the dispatch table is full)
-    boolean addListener( int eventCode, EventListener* listener );
+    boolean addListener( int eventCode, EventListener listener );
 
     // Remove (event, listener) pair (all occurrences)
     // Other listeners with the same function or event code will not be affected
-    boolean removeListener( int eventCode, EventListener* listener );
- 
+    boolean removeListener( int eventCode, EventListener listener );
+
     // Remove all occurrances of a listener
     // Removes this listener regardless of the event code; returns number removed
     // Useful when one listener handles many different events
-    int removeListener( EventListener* listener );
+    int removeListener( EventListener listener );
 
     // Enable or disable a listener
     // Return true if the listener was successfully enabled or disabled, false if the listener was not found
-    boolean enableListener( int eventCode, EventListener* listener, boolean enable );
+    boolean enableListener( int eventCode, EventListener listener, boolean enable );
 
     // Returns the current enabled/disabled state of the (eventCode, listener) combo
-    boolean isListenerEnabled( int eventCode, EventListener* listener );
+    boolean isListenerEnabled( int eventCode, EventListener listener );
 
     // The default listener is a callback function that is called when an event with no listener is processed
     // These functions set, clear, and enable/disable the default listener
-    boolean setDefaultListener( EventListener* listener );
+    boolean setDefaultListener( EventListener listener );
     void removeDefaultListener();
     void enableDefaultListener( boolean enable );
-    
+
     // Is the ListenerList empty?
     boolean isListenerListEmpty();
-    
+
     // Is the ListenerList full?
     boolean isListenerListFull();
 
     int numListeners();
-    
+
     // Returns true if no events are in the queue
     boolean isEventQueueEmpty( EventPriority pri = kLowPriority );
 
@@ -232,14 +200,14 @@ public:
     int processAllEvents();
 
 
-private:  
-    
+private:
+
     // EventQueue class used internally by EventManager
-    class EventQueue 
+    class EventQueue
     {
 
     public:
-    
+
         // Queue constructor
         EventQueue( boolean beSafe );
 
@@ -265,7 +233,7 @@ private:
         boolean popEvent( int* eventCode, int* eventParam );
 
     private:
-    
+
         // Event queue size.
         // The maximum number of events the queue can hold is kEventQueueSize
         // Increasing this number will consume 2 * sizeof(int) bytes of RAM for each unit.
@@ -276,7 +244,7 @@ private:
             int code;	// each event is represented by an integer code
             int param;	// each event has a single integer parameter
         };
-        
+
         // The event queue
         EventElement mEventQueue[ kEventQueueSize ];
 
@@ -288,14 +256,14 @@ private:
 
         // Actual number of events in queue
         int mNumEvents;
-        
+
         // Whether we should be interrupt safe
         boolean mInterruptSafeMode;
     };
-    
-    
+
+
     // ListenerList class used internally by EventManager
-    class ListenerList 
+    class ListenerList
     {
 
     public:
@@ -305,59 +273,58 @@ private:
 
         // Add a listener
         // Returns true if the listener is successfully installed, false otherwise (e.g. the dispatch table is full)
-        boolean addListener( int eventCode, EventListener* listener );
+        boolean addListener( int eventCode, EventListener listener );
 
         // Remove event listener pair (all occurrences)
         // Other listeners with the same function or eventCode will not be affected
-        boolean removeListener( int eventCode, EventListener* listener );
-        
+        boolean removeListener( int eventCode, EventListener listener );
+
         // Remove all occurrances of a listener
         // Removes this listener regardless of the eventCode; returns number removed
-        int removeListener( EventListener* listener );
+        int removeListener( EventListener listener );
 
         // Enable or disable a listener
         // Return true if the listener was successfully enabled or disabled, false if the listener was not found
-        boolean enableListener( int eventCode, EventListener* listener, boolean enable );
+        boolean enableListener( int eventCode, EventListener listener, boolean enable );
 
-        boolean isListenerEnabled( int eventCode, EventListener* listener );
+        boolean isListenerEnabled( int eventCode, EventListener listener );
 
         // The default listener is a callback function that is called when an event with no listener is processed
-        boolean setDefaultListener( EventListener* listener );
+        boolean setDefaultListener( EventListener listener );
         void removeDefaultListener();
         void enableDefaultListener( boolean enable );
-        
+
         // Is the ListenerList empty?
-        boolean isEmpty(); 
-        
+        boolean isEmpty();
+
         // Is the ListenerList full?
         boolean isFull();
-        
+
         // Send an event to the listeners; returns number of listeners that handled the event
         int sendEvent( int eventCode, int param );
 
         int numListeners();
 
     private:
-    
+
         // Maximum number of event/callback entries
         // Can be changed to save memory or allow more events to be dispatched
         static const int kMaxListeners = EVENTMANAGER_LISTENER_LIST_SIZE;
-        
+
         // Actual number of event listeners
         int mNumListeners;
-        
+
         // Listener structure and corresponding array
         struct ListenerItem
         {
-//            ListenerItem(EventListener* _callback,int _eventCode,boolean _enabled): callback(_callback),eventCode(_eventCode),enabled(_enabled) {};
-            EventListener*	callback;		// The listener function
+            EventListener	callback;		// The listener function
             int				eventCode;		// The event code
             boolean			enabled;			// Each listener can be enabled or disabled
         };
         ListenerItem mListeners[ kMaxListeners ];
 
         // Callback function to be called for event types which have no listener
-        EventListener* mDefaultCallback;
+        EventListener mDefaultCallback;
 
         // Once set, the default callback function can be enabled or disabled
         boolean mDefaultCallbackEnabled;
@@ -366,89 +333,89 @@ private:
         int getNumEntries();
 
         // returns the array index of the specified listener or -1 if no such event/function couple is found
-        int searchListeners( int eventCode, EventListener* listener);
-        int searchListeners( EventListener* listener );
+        int searchListeners( int eventCode, EventListener listener);
+        int searchListeners( EventListener listener );
         int searchEventCode( int eventCode );
 
     };
 
     EventQueue 	mHighPriorityQueue;
     EventQueue 	mLowPriorityQueue;
-    
+
     ListenerList		mListeners;
 };
 
 //*********  INLINES   EventManager::  ***********
 
-inline boolean EventManager::addListener( int eventCode, EventListener* listener )
-{ 
-    return mListeners.addListener( eventCode, listener ); 
+inline boolean EventManager::addListener( int eventCode, EventListener listener )
+{
+    return mListeners.addListener( eventCode, listener );
 }
 
-inline boolean EventManager::removeListener( int eventCode, EventListener* listener )
+inline boolean EventManager::removeListener( int eventCode, EventListener listener )
 {
     return mListeners.removeListener( eventCode, listener );
 }
 
-inline int EventManager::removeListener( EventListener* listener )
-{ 
+inline int EventManager::removeListener( EventListener listener )
+{
     return mListeners.removeListener( listener );
 }
 
-inline boolean EventManager::enableListener( int eventCode, EventListener* listener, boolean enable )
-{ 
-    return mListeners.enableListener( eventCode, listener, enable ); 
+inline boolean EventManager::enableListener( int eventCode, EventListener listener, boolean enable )
+{
+    return mListeners.enableListener( eventCode, listener, enable );
 }
 
-inline boolean EventManager::isListenerEnabled( int eventCode, EventListener* listener )
-{ 
-    return mListeners.isListenerEnabled( eventCode, listener ); 
+inline boolean EventManager::isListenerEnabled( int eventCode, EventListener listener )
+{
+    return mListeners.isListenerEnabled( eventCode, listener );
 }
 
-inline boolean EventManager::setDefaultListener( EventListener* listener )
-{ 
-    return mListeners.setDefaultListener( listener ); 
+inline boolean EventManager::setDefaultListener( EventListener listener )
+{
+    return mListeners.setDefaultListener( listener );
 }
 
 inline void EventManager::removeDefaultListener()
-{ 
-    mListeners.removeDefaultListener(); 
+{
+    mListeners.removeDefaultListener();
 }
 
 inline void EventManager::enableDefaultListener( boolean enable )
-{ 
-    mListeners.enableDefaultListener( enable ); 
+{
+    mListeners.enableDefaultListener( enable );
 }
-    
+
 inline boolean EventManager::isListenerListEmpty()
-{ 
-    return mListeners.isEmpty(); 
+{
+    return mListeners.isEmpty();
 }
-    
+
 inline boolean EventManager::isListenerListFull()
-{ 
+{
     return mListeners.isFull();
 }
-    
+
 inline boolean EventManager::isEventQueueEmpty( EventPriority pri )
-{ 
-    return ( pri == kHighPriority ) ? mHighPriorityQueue.isEmpty() : mLowPriorityQueue.isEmpty(); 
+{
+    return ( pri == kHighPriority ) ? mHighPriorityQueue.isEmpty() : mLowPriorityQueue.isEmpty();
 }
 
-inline boolean EventManager::isEventQueueFull( EventPriority pri ) 
-{ 
-    return ( pri == kHighPriority ) ? mHighPriorityQueue.isFull() : mLowPriorityQueue.isFull(); 
+inline boolean EventManager::isEventQueueFull( EventPriority pri )
+{
+    return ( pri == kHighPriority ) ? mHighPriorityQueue.isFull() : mLowPriorityQueue.isFull();
 }
 
-inline int EventManager::getNumEventsInQueue( EventPriority pri ) 
-{ 
-    return ( pri == kHighPriority ) ? mHighPriorityQueue.getNumEvents() : mLowPriorityQueue.getNumEvents(); 
+inline int EventManager::getNumEventsInQueue( EventPriority pri )
+{
+    return ( pri == kHighPriority ) ? mHighPriorityQueue.getNumEvents() : mLowPriorityQueue.getNumEvents();
 }
 
-inline boolean EventManager::queueEvent( int eventCode, int eventParam, EventPriority pri ) 
-{ 
-    return ( pri == kHighPriority ) ? 
-        mHighPriorityQueue.queueEvent( eventCode, eventParam ) : mLowPriorityQueue.queueEvent( eventCode, eventParam ); 
+inline boolean EventManager::queueEvent( int eventCode, int eventParam, EventPriority pri )
+{
+    return ( pri == kHighPriority ) ?
+        mHighPriorityQueue.queueEvent( eventCode, eventParam ) : mLowPriorityQueue.queueEvent( eventCode, eventParam );
 }
 
 
@@ -456,19 +423,19 @@ inline boolean EventManager::queueEvent( int eventCode, int eventParam, EventPri
 
 //*********  INLINES   EventManager::EventQueue::  ***********
 
-inline boolean EventManager::EventQueue::isEmpty() 
+inline boolean EventManager::EventQueue::isEmpty()
 {
     return ( mNumEvents == 0 );
 }
 
 
-inline boolean EventManager::EventQueue::isFull() 
+inline boolean EventManager::EventQueue::isFull()
 {
     return ( mNumEvents == kEventQueueSize );
 }
 
 
-inline int EventManager::EventQueue::getNumEvents() 
+inline int EventManager::EventQueue::getNumEvents()
 {
     return mNumEvents;
 }
@@ -477,19 +444,19 @@ inline int EventManager::EventQueue::getNumEvents()
 
 //*********  INLINES   EventManager::ListenerList::  ***********
 
-inline boolean EventManager::ListenerList::isEmpty() 
-{ 
-    return (mNumListeners == 0); 
+inline boolean EventManager::ListenerList::isEmpty()
+{
+    return (mNumListeners == 0);
 }
 
-inline boolean EventManager::ListenerList::isFull() 
-{ 
-    return (mNumListeners == kMaxListeners); 
+inline boolean EventManager::ListenerList::isFull()
+{
+    return (mNumListeners == kMaxListeners);
 }
 
-inline int EventManager::ListenerList::getNumEntries() 
-{ 
-    return mNumListeners; 
+inline int EventManager::ListenerList::getNumEntries()
+{
+    return mNumListeners;
 }
 
 

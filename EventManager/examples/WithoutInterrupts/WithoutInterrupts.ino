@@ -1,23 +1,23 @@
 /*
-  This sketch assumes an LED on pin 13 (built-in on Arduino Uno) and 
-  an LED on pin 8.  It blinks boths LED using events generated 
+  This sketch assumes an LED on pin 13 (built-in on Arduino Uno) and
+  an LED on pin 8.  It blinks boths LED using events generated
   by checking elasped time against millis() -- no interrupts involved.
-  
+
   Author: igormt@alumni.caltech.edu
   Copyright (c) 2013 Igor Mikolic-Torreira
-  
+
   This software is free software; you can redistribute it
   and/or modify it under the terms of the GNU Lesser
   General Public License as published by the Free Software
   Foundation; either version 2.1 of the License, or (at
   your option) any later version.
- 
+
   This software is distributed in the hope that it will
   be useful, but WITHOUT ANY WARRANTY; without even the
   implied warranty of MERCHANTABILITY or FITNESS FOR A
   PARTICULAR PURPOSE.  See the GNU Lesser General Public
   License for more details.
- 
+
   You should have received a copy of the GNU Lesser
   General Public License along with this library; if not,
   write to the Free Software Foundation, Inc.,
@@ -53,73 +53,28 @@ void listener( int event, int pin )
     Serial.println("free function called");
 }
 
-class C
+
+
+
+void setup()
 {
-  int v;
-public:
-  C(int _v):v(_v) {};
-  void f(int a, int b){
-    Serial.print("member function called, value is ");
-    Serial.println(v);
-  };
-};
+    // Setup
+    Serial.begin( 115200 );
+    pinMode( gPins[0].pinNbr, OUTPUT );
+    pinMode( gPins[1].pinNbr, OUTPUT );
 
-C c(2);
-C d(1);
-MemberFunctionCallable<C> listenerMemberFunction1(&c,&C::f);
-MemberFunctionCallable<C> listenerMemberFunction2;
-GenericCallable<void(int,int)> listenerFreeFunction(listener);
-
-
-
-void setup() 
-{                
-  // Setup
-  Serial.begin( 115200 );
-  pinMode( gPins[0].pinNbr, OUTPUT );
-  pinMode( gPins[1].pinNbr, OUTPUT );
-
-  listenerMemberFunction2.obj=&d;
-  listenerMemberFunction2.f=&C::f;
-
-
-  // Add our listener
-  gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction1 );
-  gEM.addListener( EventManager::kEventUser0, &listenerFreeFunction );
-  gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction2 );
-  Serial.print("listeners number:");
-  Serial.println(gEM.numListeners());
+    // Add our listener
+    gEM.addListener( EventManager::kEventUser0, listener );
+    Serial.print( "Number of listeners: " );
+    Serial.println( gEM.numListeners() );
 }
 
 
-uint32_t loopCount=0;
-
-void loop() 
+void loop()
 {
-  loopCount++;
-
-
-
-  switch (loopCount)
-  {
-    case 100000:
-      gEM.removeListener( &listenerMemberFunction1);
-      Serial.print("(case 1000000)listeners number:");
-      Serial.println(gEM.numListeners());
-      break;
-    // case 20000:
-    //   gEM.removeListener( &listenerMemberFunction2);
-    //   break;
-    // case 30000:
-    //   gEM.removeListener( &listenerMemberFunction1);
-    //   break;
-
-
-  }
-
     // Handle any events that are in the queue
     gEM.processEvent();
-    
+
     // Add events into the queue
     addPin0Events();
     addPin1Events();
