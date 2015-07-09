@@ -52,20 +52,46 @@ void listener( int event, int pin )
     Serial.println("free function called");
 }
 
+class C
+{
+    int mv;
+
+public:
+    C( int v ) : mv( v ) {}
+
+    void f( int eventCode, int eventParam )
+    {
+        Serial.print("member function called, value is ");
+        Serial.println( mv );
+    };
+};
+
+C c( 2 );
+C d( 1 );
+
+MemberFunctionCallable<C> listenerMemberFunction1( &c, &C::f );
+MemberFunctionCallable<C> listenerMemberFunction2;
+GenericCallable<void(int,int)> listenerFreeFunction( listener );
 
 
 
 void setup()
 {
-    // Setup
-    Serial.begin( 115200 );
-    pinMode( gPins[0].pinNbr, OUTPUT );
-    pinMode( gPins[1].pinNbr, OUTPUT );
+  // Setup
+  Serial.begin( 115200 );
+  pinMode( gPins[0].pinNbr, OUTPUT );
+  pinMode( gPins[1].pinNbr, OUTPUT );
 
-    // Add our listener
-    gEM.addListener( EventManager::kEventUser0, listener );
-    Serial.print( "Number of listeners: " );
-    Serial.println( gEM.numListeners() );
+  listenerMemberFunction2.mObj = &d;
+  listenerMemberFunction2.mf = &C::f;
+
+
+  // Add our listener
+  gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction1 );
+  gEM.addListener( EventManager::kEventUser0, &listenerFreeFunction );
+  gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction2 );
+  Serial.print( "Number of listeners is:  " );
+  Serial.println( gEM.numListeners() );
 }
 
 
@@ -97,9 +123,6 @@ void addPin1Events()
     if ( ( millis() - gPins[1].lastToggled ) > 3000 )
     {
 	     gEM.queueEvent( EventManager::kEventUser0, 1 );
-         Serial.print("(addPin1Events)listeners number:");
-         Serial.println(gEM.numListeners());
-
     }
 }
 

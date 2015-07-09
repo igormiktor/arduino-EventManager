@@ -29,6 +29,8 @@ branch contains a version of **EventManager** that accepts more general types of
 listeners such as callable member functions and callable objects.  If you don't
 know what these are, stick to the master branch.
 
+This is the GenericListeners branch version.
+
 Installation
 ------------
 
@@ -118,22 +120,77 @@ value you desire *before* you ``#include<EventManager.h>``.
 Listeners
 ~~~~~~~~~
 
-Listeners are functions of type:
+Listeners can be functions, callable member functions, or callable objects.  If you
+don't know what these are, you should instead use the verions of **EventManager** on
+the master branch.
 
-    typedef void ( *EventListener )( int eventCode, int eventParam );
+Callable objects should derive from class ``EventListener`` which provides a virtual
+member function ``void operator()( int eventCode, int eventParam )`` that you should
+define in your derived class.  You can use pointers to such objects directly as
+listeners, like so::
 
-You add listeners using the ``addListener()`` function::
+    // A class derived from EventListener
+    class C : public EventListener
+    {
+    public:
+        void operator()( int eventCode, int eventParam )
+        {
+            // Do something with the event
+        };
+    };
 
-    void myListener( int eventCode, int eventParam )
+    // Create an instance of this class
+    C listenerObject;
+
+    void setup()
+    {
+        // Add our listener
+        gEM.addListener( EventManager::kEventUser0, &listenerObject );
+    }
+
+Callable member functions should have prototype ``void f( int eventCode, int eventParam )``
+and are converted to callable objects using the template ``MemberFunctionCallable<T>``.
+So for example::
+
+    // A class with a member function we want to use as a listener
+    class C
+    {
+    public:
+        void f( int eventCode, int eventParam )
+        {
+            // Do something with the event
+        };
+    };
+
+    // Create an instance of this class
+    C x;
+
+    // Create the actual listener object that uses x and C::f
+    MemberFunctionCallable<C> listenerMemberFunction( &x, &C::f );
+
+    void setup()
+    {
+        // Add our listener
+        gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction );
+    }
+
+Finally, you can also use ordinate functions with prototype
+``void f( int eventCode, int eventParam )`` by using the template
+``GenericCallable<void(int,int)>`` to wrap these in a callable object,
+like so::
+
+    void f( int eventCode, int eventParam )
     {
         // Do something with the event
     }
 
+    // Wrap the function in a callable object
+    GenericCallable<void(int,int)> listenerFunction( f );
+
     void setup()
     {
-        gMyEventManager.addListener( EventManager::kEventUser0, myListener );
-
-        // Do more set up
+        // Add our listener
+        gMyEventManager.addListener( EventManager::kEventUser0, &listenerFunction );
     }
 
 Do *not* add listeners from within an interrupt routine.
@@ -184,6 +241,9 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
         lastToggled = millis();
     }
 
+    // Wrap the listener in a callable object
+    GenericCallable<void(int,int)> listenerObject( listener );
+
     void setup()
     {
         // Setup
@@ -193,7 +253,7 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
         lastToggled = millis();
 
         // Add our listener
-        gEM.addListener( EventManager::kEventUser0, listener );
+        gEM.addListener( EventManager::kEventUser0, &listenerObject );
     }
 
     void loop()

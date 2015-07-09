@@ -243,7 +243,7 @@ int EventManager::numListeners()
     return mListeners.numListeners();
 };
 
-boolean EventManager::ListenerList::addListener( int eventCode, EventListener listener )
+boolean EventManager::ListenerList::addListener( int eventCode, EventListener* listener )
 {
     EVTMGR_DEBUG_PRINT( "addListener() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
@@ -274,7 +274,7 @@ boolean EventManager::ListenerList::addListener( int eventCode, EventListener li
 }
 
 
-boolean EventManager::ListenerList::removeListener( int eventCode, EventListener listener )
+boolean EventManager::ListenerList::removeListener( int eventCode, EventListener* listener )
 {
     EVTMGR_DEBUG_PRINT( "removeListener() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
@@ -308,7 +308,7 @@ boolean EventManager::ListenerList::removeListener( int eventCode, EventListener
 }
 
 
-int EventManager::ListenerList::removeListener( EventListener listener )
+int EventManager::ListenerList::removeListener( EventListener* listener )
 {
     EVTMGR_DEBUG_PRINT( "removeListener() enter " )
     EVTMGR_DEBUG_PRINTLN_PTR( listener )
@@ -340,7 +340,7 @@ int EventManager::ListenerList::removeListener( EventListener listener )
 }
 
 
-boolean EventManager::ListenerList::enableListener( int eventCode, EventListener listener, boolean enable )
+boolean EventManager::ListenerList::enableListener( int eventCode, EventListener* listener, boolean enable )
 {
     EVTMGR_DEBUG_PRINT( "enableListener() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
@@ -369,7 +369,7 @@ boolean EventManager::ListenerList::enableListener( int eventCode, EventListener
 }
 
 
-boolean EventManager::ListenerList::isListenerEnabled( int eventCode, EventListener listener )
+boolean EventManager::ListenerList::isListenerEnabled( int eventCode, EventListener* listener )
 {
     if ( mNumListeners == 0 )
     {
@@ -429,7 +429,7 @@ int EventManager::ListenerList::sendEvent( int eventCode, int param )
 }
 
 
-boolean EventManager::ListenerList::setDefaultListener( EventListener listener )
+boolean EventManager::ListenerList::setDefaultListener( EventListener* listener )
 {
     EVTMGR_DEBUG_PRINT( "setDefaultListener() enter " )
     EVTMGR_DEBUG_PRINTLN_PTR( listener )
@@ -458,7 +458,7 @@ void EventManager::ListenerList::enableDefaultListener( boolean enable )
 }
 
 
-int EventManager::ListenerList::searchListeners( int eventCode, EventListener listener )
+int EventManager::ListenerList::searchListeners( int eventCode, EventListener* listener )
 {
 
     for ( int i = 0; i < mNumListeners; i++ )
@@ -475,7 +475,7 @@ int EventManager::ListenerList::searchListeners( int eventCode, EventListener li
 }
 
 
-int EventManager::ListenerList::searchListeners( EventListener listener )
+int EventManager::ListenerList::searchListeners( EventListener* listener )
 {
     for ( int i = 0; i < mNumListeners; i++ )
     {

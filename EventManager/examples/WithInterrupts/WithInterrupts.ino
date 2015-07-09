@@ -56,7 +56,7 @@ void interruptHandler()
 
     if ( !oddEven )
     {
-        gEM.queueEvent( EventManager::kEventUser0, 1 );
+	gEM.queueEvent( EventManager::kEventUser0, 1 );
     }
 
     ++oddEven;
@@ -72,6 +72,9 @@ void listener( int event, int pin )
     digitalWrite( gPins[pin].pinNbr, gPins[pin].pinState ? HIGH : LOW );
 }
 
+// Create a generic callable object from our listener function
+GenericCallable<void(int,int)> listenerFreeFunction( listener );
+
 
 void setup()
 {
@@ -81,7 +84,7 @@ void setup()
     pinMode( gPins[1].pinNbr, OUTPUT );
 
     // Add our listener
-    gEM.addListener( EventManager::kEventUser0, listener );
+    gEM.addListener( EventManager::kEventUser0, &listenerFreeFunction );
 
     // Set up interrupts every second
     MsTimer2::set( 1000, interruptHandler ); // 1 sec period
