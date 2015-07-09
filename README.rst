@@ -174,7 +174,7 @@ So for example::
         gEM.addListener( EventManager::kEventUser0, &listenerMemberFunction );
     }
 
-Finally, you can also use ordinate functions with prototype
+Finally, you can also use ordinary functions with prototype
 ``void f( int eventCode, int eventParam )`` by using the template
 ``GenericCallable<void(int,int)>`` to wrap these in a callable object,
 like so::
