@@ -33,7 +33,17 @@
 
 
 #include "EventManager.h"
-#include <util/atomic.h>
+
+
+
+
+static __inline__ void restoreInterruptState( const uint8_t *s )
+{
+    SREG = *s;
+    __asm__ volatile ("" ::: "memory");
+}
+
+
 
 
 #if EVENTMANAGER_DEBUG
@@ -494,7 +504,7 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
     if ( mInterruptSafeMode )
     {
         // Restore previous state of interrupts
-        __iRestore( &sregSave );
+        restoreInterruptState( &sregSave );
     }
 
 #if EVENTMANAGER_DEBUG
