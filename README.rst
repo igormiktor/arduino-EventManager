@@ -154,7 +154,7 @@ call the ``processEvent()`` function::
         gMyEventManager.processEvent();
     }
 
-This call process one event from the event queue every time it is called.
+This call processes one event from the event queue every time it is called.
 The standard usage is to call ``processEvent()`` once in your ``loop()``
 function so that one event is handled every time through the loop. This is
 usually more than adequate to keep up with incoming events.  Events are
