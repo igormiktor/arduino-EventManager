@@ -37,11 +37,13 @@
 
 
 
+#ifndef ESP_H
 static __inline__ void restoreInterruptState( const uint8_t *s )
 {
     SREG = *s;
     __asm__ volatile ("" ::: "memory");
 }
+#endif
 
 
 
@@ -474,13 +476,22 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
     }
 #endif
 
+#ifdef ESP_H
+    uint32_t sregSave;
+#else
     uint8_t sregSave;
+#endif
+
     if ( mInterruptSafeMode )
     {
         // Set up the atomic section by saving SREG and turning off interrupts
         // (because we might or might not be called inside an interrupt handler)
+#ifdef ESP_H
+        sregSave = xt_rsil(0);
+#else
         sregSave = SREG;
         cli();
+#endif
     }
 
     // ATOMIC BLOCK BEGIN (only atomic **if** mInterruptSafeMode is on)
@@ -504,7 +515,11 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
     if ( mInterruptSafeMode )
     {
         // Restore previous state of interrupts
+#ifdef ESP_H
+        xt_wsr_ps(sregSave);
+#else
         restoreInterruptState( &sregSave );
+#endif
     }
 
 #if EVENTMANAGER_DEBUG
@@ -548,7 +563,11 @@ boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
     if ( mInterruptSafeMode )
     {
         EVTMGR_DEBUG_PRINTLN( "popEvent() interrupts off" )
+#ifdef ESP_H
+        noInterrupts();
+#else
         cli();
+#endif
     }
 
     // Pop the event from the head of the queue
@@ -569,7 +588,11 @@ boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
     {
         // This function is NOT designed to called from interrupt handlers, so
         // it is safe to turn interrupts on instead of restoring a previous state.
+#ifdef ESP_H
+        interrupts();
+#else
         sei();
+#endif
         EVTMGR_DEBUG_PRINTLN( "popEvent() interrupts on" )
     }
 
