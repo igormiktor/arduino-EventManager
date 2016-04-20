@@ -106,7 +106,10 @@ namespace
         SuppressInterrupts()
         {
             // This turns off interrupts and gets the old state in one function call
-            mSavedInterruptState = xt_rsil( 0 );
+            // See https://github.com/esp8266/Arduino/issues/615 for details
+            // level 15 will disable ALL interrupts,
+            // level 0 will enable ALL interrupts
+            mSavedInterruptState = xt_rsil( 15 );
         }
 
         // Restore whatever interrupt state was active before
