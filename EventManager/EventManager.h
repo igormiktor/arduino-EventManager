@@ -58,13 +58,6 @@ public:
     // Type for an event listener (a.k.a. callback) function
     typedef void ( *EventListener )( int eventCode, int eventParam );
 
-    // EventManager can be instantiated in either as interrupt safe or
-    // non-interupt safe configuration.  The default is interrupt safe, but
-    // these constants can be used to explicitly set the configuration.
-    // If you queue events from an interrupt handler, you must instantiate
-    // the EventManager in interrupt safe mode.
-    enum SafetyMode { kNotInterruptSafe, kInterruptSafe };
-
     // EventManager recognizes two kinds of events.  By default, events are
     // are queued as low priority, but these constants can be used to explicitly
     // set the priority when queueing events
@@ -140,8 +133,8 @@ public:
 
 
     // Create an event manager
-    // By default, it operates in interrupt safe mode, allowing you to queue events from interrupt handlers
-    EventManager( SafetyMode safety = kInterruptSafe );
+    // It always operates in interrupt safe mode, allowing you to queue events from interrupt handlers
+    EventManager();
 
     // Add a listener
     // Returns true if the listener is successfully installed, false otherwise (e.g. the dispatch table is full)
@@ -209,7 +202,7 @@ private:
     public:
 
         // Queue constructor
-        EventQueue( boolean beSafe );
+        EventQueue();
 
         // Returns true if no events are in the queue
         boolean isEmpty();
@@ -256,9 +249,6 @@ private:
 
         // Actual number of events in queue
         int mNumEvents;
-
-        // Whether we should be interrupt safe
-        boolean mInterruptSafeMode;
     };
 
 

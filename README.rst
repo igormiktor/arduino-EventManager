@@ -250,14 +250,7 @@ both from within interrupt handlers and also from normal functions without
 having to worry about queue corruption.  However, this safety comes at the price
 of slightly slower ``queueEvent()`` and ``processEvent()`` functions and the
 need to globally disable interrupts while certain small snippets of code are
-executing.  If you are not queuing events from interrupt handlers, you can
-eliminate this overhead by instantiating **EventManager** in non-interrupt-safe
-mode. You do this by passing a special flag to the constructor::
-
-    EventManager gMyEventManager( EventManager::kNotInterruptSafe );
-
-This will save you a few cycles and preclude **EventManager** from ever disabling
-interrupts.
+executing.
 
 Processing All Events
 ~~~~~~~~~~~~~~~~~~~~~
