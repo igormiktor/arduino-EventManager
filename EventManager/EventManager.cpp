@@ -96,7 +96,7 @@ namespace
         uint8_t     mInterruptsWereOn;
     };
 
-#elif defined( ESP_H )
+#elif defined( ESP8266 )
 
     class SuppressInterrupts
     {
