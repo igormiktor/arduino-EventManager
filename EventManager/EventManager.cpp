@@ -34,13 +34,102 @@
 
 #include "EventManager.h"
 
-
-
-
-static __inline__ void restoreInterruptState( const uint8_t *s )
+namespace
 {
-    SREG = *s;
-    __asm__ volatile ("" ::: "memory");
+    // This class takes care of turning interrupts on and off.
+    // There is a different implementation of this class for each architecture that
+    // has a different interrupt model.  #if macros ensure only one version is defined.
+
+#if defined( __AVR_ARCH__ )
+
+    class SuppressInterrupts
+    {
+    public:
+
+        // Record the current state and suppress interrupts when the object is instantiated.
+        SuppressInterrupts()
+        {
+            mInterruptsWereOn = (SREG & (1<<SREG_I));
+            cli();
+        }
+
+        // Restore whatever interrupt state was active before
+        ~SuppressInterrupts()
+        {
+            // Turn on global interrupts, only if they were already on
+            if ( mInterruptsWereOn )
+            {
+                sei();
+            }
+        }
+
+    private:
+
+        uint8_t     mInterruptsWereOn;
+    };
+
+#elif defined( SAM )
+
+    class SuppressInterrupts
+    {
+    public:
+
+        // Record the current state and suppress interrupts when the object is instantiated.
+        SuppressInterrupts()
+        {
+            mInterruptsWereOn = (__get_PRIMASK() == 0);
+            __disable_irq();
+        }
+
+        // Restore whatever interrupt state was active before
+        ~SuppressInterrupts()
+        {
+            // Turn on interrupts, only if they were already on
+            if ( mInterruptsWereOn )
+            {
+                __enable_irq();
+            }
+        }
+
+    private:
+
+        uint8_t     mInterruptsWereOn;
+    };
+
+#elif defined( ESP8266 )
+
+    class SuppressInterrupts
+    {
+    public:
+
+        // Record the current state and suppress interrupts when the object is instantiated.
+        SuppressInterrupts()
+        {
+            // This turns off interrupts and gets the old state in one function call
+            // See https://github.com/esp8266/Arduino/issues/615 for details
+            // level 15 will disable ALL interrupts,
+            // level 0 will enable ALL interrupts
+            mSavedInterruptState = xt_rsil( 15 );
+        }
+
+        // Restore whatever interrupt state was active before
+        ~SuppressInterrupts()
+        {
+            // Restore the old interrupt state
+            xt_wsr_ps( mSavedInterruptState );
+        }
+
+    private:
+
+        uint32_t    mSavedInterruptState;
+    };
+
+#else
+
+#error "Unknown microcontroller:  Need to implement class SuppressInterrupts for this microcontroller."
+
+#endif
+
 }
 
 
@@ -59,9 +148,7 @@ static __inline__ void restoreInterruptState( const uint8_t *s )
 #endif
 
 
-EventManager::EventManager( SafetyMode safety ) :
-mHighPriorityQueue( ( safety == EventManager::kInterruptSafe ) ),
-mLowPriorityQueue( ( safety == EventManager::kInterruptSafe ) )
+EventManager::EventManager()
 {
 }
 
@@ -422,11 +509,10 @@ int EventManager::ListenerList::searchEventCode( int eventCode )
 
 
 
-EventManager::EventQueue::EventQueue( boolean beSafe ) :
+EventManager::EventQueue::EventQueue() :
 mEventQueueHead( 0 ),
 mEventQueueTail( 0 ),
-mNumEvents( 0 ),
-mInterruptSafeMode( beSafe )
+mNumEvents( 0 )
 {
     for ( int i = 0; i < kEventQueueSize; i++ )
     {
@@ -461,29 +547,9 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
     *
     */
 
-    // Because this function may be called from interrupt handlers, debugging is
-    // only available in when NOT in interrupt safe mode.
+    SuppressInterrupts  interruptsOff;      // Interrupts automatically restored when exit block
 
-#if EVENTMANAGER_DEBUG
-    if ( !mInterruptSafeMode )
-    {
-        EVTMGR_DEBUG_PRINT( "queueEvent() enter " )
-        EVTMGR_DEBUG_PRINT( eventCode )
-        EVTMGR_DEBUG_PRINT( ", " )
-        EVTMGR_DEBUG_PRINTLN( eventParam )
-    }
-#endif
-
-    uint8_t sregSave;
-    if ( mInterruptSafeMode )
-    {
-        // Set up the atomic section by saving SREG and turning off interrupts
-        // (because we might or might not be called inside an interrupt handler)
-        sregSave = SREG;
-        cli();
-    }
-
-    // ATOMIC BLOCK BEGIN (only atomic **if** mInterruptSafeMode is on)
+    // ATOMIC BLOCK BEGIN
     boolean retVal = false;
     if ( !isFull() )
     {
@@ -501,20 +567,6 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
     }
     // ATOMIC BLOCK END
 
-    if ( mInterruptSafeMode )
-    {
-        // Restore previous state of interrupts
-        restoreInterruptState( &sregSave );
-    }
-
-#if EVENTMANAGER_DEBUG
-    if ( !mInterruptSafeMode )
-    {
-        EVTMGR_DEBUG_PRINT( "queueEvent() " )
-        EVTMGR_DEBUG_PRINTLN( retVal ? "added" : "full" )
-    }
-#endif
-
     return retVal;
 }
 
@@ -529,7 +581,7 @@ boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
     * return is executed.  We'll pick up that asynchronously queued event the next time
     * popEvent() is called.
     *
-    * If noInterrupts() is set before the isEmpty() check, we pretty much lock-up the Arduino.
+    * If interrupts are suppressed before the isEmpty() check, we pretty much lock-up the Arduino.
     * This is because popEvent(), via processEvents(), is normally called inside loop(), which
     * means it is called VERY OFTEN.  Most of the time (>99%), the event queue will be empty.
     * But that means that we'll have interrupts turned off for a significant fraction of the
@@ -545,11 +597,7 @@ boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
         return false;
     }
 
-    if ( mInterruptSafeMode )
-    {
-        EVTMGR_DEBUG_PRINTLN( "popEvent() interrupts off" )
-        cli();
-    }
+    SuppressInterrupts  interruptsOff;      // Interrupts automatically restored when exit block
 
     // Pop the event from the head of the queue
     // Store event code and event parameter into the user-supplied variables
@@ -564,19 +612,6 @@ boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
 
     // Update number of events in queue
     mNumEvents--;
-
-    if ( mInterruptSafeMode )
-    {
-        // This function is NOT designed to called from interrupt handlers, so
-        // it is safe to turn interrupts on instead of restoring a previous state.
-        sei();
-        EVTMGR_DEBUG_PRINTLN( "popEvent() interrupts on" )
-    }
-
-    EVTMGR_DEBUG_PRINT( "popEvent() return " )
-    EVTMGR_DEBUG_PRINT( *eventCode )
-    EVTMGR_DEBUG_PRINT( ", " )
-    EVTMGR_DEBUG_PRINTLN( *eventParam )
 
     return true;
 }

@@ -39,8 +39,7 @@ struct Pins
 Pins gPins[2] = { { 13, LOW, 0 }, { 8, LOW, 0 } };
 
 
-// No interrupts, so can use the non-interrupt safe mode
-EventManager gEM( EventManager::kNotInterruptSafe );
+EventManager gEM;
 
 
 
