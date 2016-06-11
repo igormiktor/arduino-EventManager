@@ -124,6 +124,28 @@ namespace
         uint32_t    mSavedInterruptState;
     };
 
+#elif defined( CORE_TEENSY )
+    
+    class SuppressInterrupts
+    {
+    public:
+        
+        //Reference: https://www.pjrc.com/teensy/interrupts.html
+        //Backup the interrupt enable state and restore it
+        SuppressInterrupts() {
+            mSregBackup = SREG;     /* save interrupt enable/disable state */
+            cli();                  /* disable the global interrupt */
+        }
+        
+        ~SuppressInterrupts() {
+            SREG = mSregBackup;     /* restore interrupt state */
+        }
+        
+    private:
+        
+        uint8_t mSregBackup;
+    };
+    
 #else
 
 #error "Unknown microcontroller:  Need to implement class SuppressInterrupts for this microcontroller."
