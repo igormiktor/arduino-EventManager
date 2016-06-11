@@ -133,17 +133,17 @@ namespace
         //Reference: https://www.pjrc.com/teensy/interrupts.html
         //Backup the interrupt enable state and restore it
         SuppressInterrupts() {
-            sreg_backup = SREG;     /* save interrupt enable/disable state */
+            mSregBackup = SREG;     /* save interrupt enable/disable state */
             cli();                  /* disable the global interrupt */
         }
         
         ~SuppressInterrupts() {
-            SREG = sreg_backup;     /* restore interrupt state */
+            SREG = mSregBackup;     /* restore interrupt state */
         }
         
     private:
         
-        unsigned char sreg_backup;
+        uint8_t mSregBackup;
     };
     
 #else
