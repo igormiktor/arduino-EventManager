@@ -132,12 +132,14 @@ namespace
         
         //Reference: https://www.pjrc.com/teensy/interrupts.html
         //Backup the interrupt enable state and restore it
-        SuppressInterrupts() {
+        SuppressInterrupts() 
+        {
             mSregBackup = SREG;     /* save interrupt enable/disable state */
             cli();                  /* disable the global interrupt */
         }
         
-        ~SuppressInterrupts() {
+        ~SuppressInterrupts() 
+        {
             SREG = mSregBackup;     /* restore interrupt state */
         }
         
