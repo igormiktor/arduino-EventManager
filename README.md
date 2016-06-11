@@ -119,7 +119,7 @@ it from inside an interrupt handler.
 
 By default the event queue holds 8 events, but you can make the queue any size
 you want by defining the macro `EVENTMANAGER_EVENT_QUEUE_SIZE` to whatever
-value you desire (see [Increase Event Queue Size](#Increase Event Queue Size) below).
+value you desire (see [Increase Event Queue Size](#increase-event-queue-size) below).
 
 
 ## Listeners
@@ -151,7 +151,7 @@ Do *not* add listeners from within an interrupt routine.
 By default the list of
 listeners holds 8 listeners, but you can make the list any size you want by
 defining the macro `EVENTMANAGER_LISTENER_LIST_SIZE` to whatever
-value you desire (see [Increase Listener List Size](Increase Listener List Size) below).
+value you desire (see [Increase Listener List Size](#increase-listener-list-size) below).
 
 
 ## Processing Events
