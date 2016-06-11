@@ -241,7 +241,7 @@ you can use **EventManager**.
 **EventManager** recognizes high and low priority events.  You can specify the
 priority when you queue the event.  By default, events are considered low
 priority.  You indicate an event is high priority by passing an additional
-constant to `queueEvent()`, like so::
+constant to `queueEvent()`, like so
 
 ```C++
     gMyEventManager.queueEvent( EventManager::kEventUser0, 1234, EventManager::kHighPriority );
