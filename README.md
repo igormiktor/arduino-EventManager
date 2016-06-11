@@ -119,7 +119,7 @@ it from inside an interrupt handler.
 
 By default the event queue holds 8 events, but you can make the queue any size
 you want by defining the macro `EVENTMANAGER_EVENT_QUEUE_SIZE` to whatever
-value you desire *before* you `#include<EventManager.h>`.
+value you desire (see Increase Event Queue Size below).
 
 
 ## Listeners
@@ -153,6 +153,7 @@ listeners holds 8 listeners, but you can make the list any size you want by
 defining the macro `EVENTMANAGER_LISTENER_LIST_SIZE` to whatever value you
 desire *before* you `#include<EventManager.h>`.
 
+
 ## Processing Events
 
 To actually process events in the event queue and dispatch them to listeners you
@@ -171,6 +172,7 @@ function so that one event is handled every time through the loop. This is
 usually more than adequate to keep up with incoming events.  Events are
 normally processed in a first-in, first-out fashion (but see the section on
 `Event Priority` below).
+
 
 ## Example
 
@@ -231,6 +233,7 @@ The examples that come with the **EventManager** library (accessible via the
 Arduino `File/Examples` menu) provide more sophisticated illustrations of how
 you can use **EventManager**.
 
+
 ## Advanced Details
 
 ### Event Priority
@@ -254,6 +257,7 @@ Note that if high priority events are queued faster than low priority events,
 EventManager may never get to processing any of the low priority
 events.  So use high priority events judiciously.
 
+
 ### Interrupt Safety
 
 **EventManager** was designed to be interrupt safe, so that you can queue events
@@ -262,6 +266,7 @@ having to worry about queue corruption.  However, this safety comes at the price
 of slightly slower `queueEvent()` and `processEvent()` functions and the
 need to globally disable interrupts while certain small snippets of code are
 executing.
+
 
 ### Processing All Events
 
@@ -272,6 +277,7 @@ you can call `processAllEvents()`.  Note that if you call this function at the
 same time that a series of events are being rapidly added to the queue
 asynchronously (via interrupt handlers), the `processAllEvents()` function
 might not return until the series of additions to the event queue stops.
+
 
 ### Increase Event Queue Size
 
@@ -290,15 +296,16 @@ the very beginning of `EventManager.h` like so
 If you are using the Arduino IDE, it is not enough to define this constant the 
 usual C/C++ way by defining the constant *before* including `EventManager.h` 
 in your own files.  This is because the Arduino IDE has no way to pass the 
-definition to the library code unless you actually edit `EventManager.h`.  
-The Arduino IDE lacks a way to pass precompile constants to all the files in the 
-project.  Given that the underlying compiler is GCC, the Arduino IDE could easily
-have a dialog to set things like `-D EVENTMANAGER_EVENT_QUEUE_SIZE=16` 
+definition to the library code unless you actually edit `EventManager.h`. The 
+Arduino IDE lacks a way to pass precompile constants to all the files in the 
+project.  Given that the underlying compiler is GCC, it would be nice if the 
+Arduino IDE had a dialog to set things like `-D EVENTMANAGER_EVENT_QUEUE_SIZE=16` 
 and have this constant definition passed directly to the compiler.
 
 The event queue requires `4*sizeof(int) = 8` bytes for each unit of size.
 There is a factor of 4 (instead of 2) because internally **EventManager**
 maintains two separate queues: a high-priority queue and a low-priority queue.
+
 
 ### Increase Listener List Size
 
@@ -317,14 +324,15 @@ the very beginning of `EventManager.h` like so
 If you are using the Arduino IDE, it is not enough to define this constant the 
 usual C/C++ way by defining the constant *before* including `EventManager.h` 
 in your own files.  This is because the Arduino IDE has no way to pass the 
-definition to the library code unless you actually edit `EventManager.h`.
-The Arduino IDE lacks a way to pass precompile constants to all the files in the 
-project.  Given that the underlying compiler is GCC, the Arduino IDE could easily
-have a dialog to set things like `-D EVENTMANAGER_LISTENER_LIST_SIZE=16` 
+definition to the library code unless you actually edit `EventManager.h`. The 
+Arduino IDE lacks a way to pass precompile constants to all the files in the 
+project.  Given that the underlying compiler is GCC, it would be nice if the 
+Arduino IDE had a dialog to set things like `-D EVENTMANAGER_LISTENER_LIST_SIZE=16` 
 and have this constant definition passed directly to the compiler.
 
 The listener list requires `sizeof(*f()) + sizeof(int) + sizeof(boolean) = 5`
 bytes for each unit of size.
+
 
 ### Additional Features
 
@@ -343,8 +351,8 @@ queue:
 
 For details on these functions you should review *EventManager.h*.
 
-Feedback
---------
+
+## Feedback
 
 If you find a bug or if you would like a specific feature, please report it at:
 
@@ -354,16 +362,15 @@ If you would like to hack on this project, don't hesitate to fork it on GitHub.
 If you would like me to incorporate changes you made, don't hesitate to send me
 a Pull Request.
 
-Credits
--------
+
+## Credits
 
 **EventManager** was inspired by and adapted from the `Arduino Event System
 library` created by mromani@ottotecnica.com of OTTOTECNICA Italy, which was
 kindly released under a LGPL 2.1 license.
 
 
-License
--------
+## License
 
 This library is free software; you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the Free
@@ -377,8 +384,7 @@ PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 A copy of the license is included in the **EventManager** package.
 
 
-Copyright
-~~~~~~~~~
+## Copyright
 
 Copyright (c) 2016 Igor Mikolic-Torreira
 
