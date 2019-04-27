@@ -62,7 +62,7 @@ class EventManager
 public:
 
     // Type for the event parameter
-    typedef EventParamType  EVENTMANAGER_EVENT_PARAMETER_TYPE;
+    typedef EVENTMANAGER_EVENT_PARAMETER_TYPE   EventParamType;
 
     // Type for an event listener (a.k.a. callback) function
     typedef void ( *EventListener )( int eventCode, EventParamType eventParam );
