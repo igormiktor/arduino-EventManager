@@ -129,13 +129,13 @@ value you desire (see [Increase Event Queue Size](#increase-event-queue-size) be
 Listeners are functions of type
 
 ```C++
-    typedef void ( *EventListener )( int eventCode, EventParamType eventParam );
+    typedef void ( *EventListener )( int eventCode, EventManager::EventParamType eventParam );
 ```
 
 You add listeners using the `addListener()` function
 
 ```C++
-    void myListener( int eventCode, EventParamType eventParam )
+    void myListener( int eventCode, EventManager::EventParamType eventParam )
     {
         // Do something with the event
     }
@@ -191,7 +191,7 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
     EventManager gEM;
 
     // Our listener will simply toggle the state of pin 13
-    void listener( int event, EVentManager::EventParamType param )
+    void listener( int event, EventManager::EventParamType param )
     {
         // event and param are not used in this example function
         pin13State = pin13State ? false : true;
