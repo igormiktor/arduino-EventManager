@@ -28,14 +28,14 @@ listeners such as callable member functions and callable objects.  If you don't
 know what these are, stick to the master branch.
 
 
-## Installation 
+## Installation
 
 Copy the folder `EventManager` into your Arduino `Libraries` folder, as
 described in the
 [Arduino documentation](<http://arduino.cc/en/Guide/Libraries>).
 
 
-## Usage 
+## Usage
 
 At the top of your sketch you must include the **EventManager** header file
 
@@ -57,8 +57,10 @@ your code.
 
 ## Events
 
-**EventManager** `Events` consist of an event code and an event parameter.  Both
-of these are integer values.  The event code identifies the type of event.  For
+**EventManager** `Events` consist of an event code and an event parameter.  The first is an integer (16 bit)
+and the second is of type EventParamType.  This defaults to type int (16 bit signed integer), but can be changed
+setting EVENTMANAGER_EVENT_PARAMETER_TYPE to whatever you desire at line 42 of `EventManager.h`.  The event code
+identifies the type of event.  For
 your convenience, `EventManager.h` provides a set of constants you can use to
 identify events
 
@@ -127,13 +129,13 @@ value you desire (see [Increase Event Queue Size](#increase-event-queue-size) be
 Listeners are functions of type
 
 ```C++
-    typedef void ( *EventListener )( int eventCode, int eventParam );
+    typedef void ( *EventListener )( int eventCode, EventParamType eventParam );
 ```
 
 You add listeners using the `addListener()` function
 
 ```C++
-    void myListener( int eventCode, int eventParam )
+    void myListener( int eventCode, EventParamType eventParam )
     {
         // Do something with the event
     }
@@ -189,7 +191,7 @@ Here is a simple example illustrating how to blink the LED on pin 13 using
     EventManager gEM;
 
     // Our listener will simply toggle the state of pin 13
-    void listener( int event, int param )
+    void listener( int event, EVentManager::EventParamType param )
     {
         // event and param are not used in this example function
         pin13State = pin13State ? false : true;
@@ -281,7 +283,7 @@ might not return until the series of additions to the event queue stops.
 
 ### Increase Event Queue Size
 
-Define `EVENTMANAGER_EVENT_QUEUE_SIZE` to whatever size you need at 
+Define `EVENTMANAGER_EVENT_QUEUE_SIZE` to whatever size you need at
 the very beginning of `EventManager.h` like so
 
 ```C++
@@ -293,23 +295,25 @@ the very beginning of `EventManager.h` like so
     #include <Arduino.h>
 ```
 
-If you are using the Arduino IDE, it is not enough to define this constant the 
-usual C/C++ way by defining the constant *before* including `EventManager.h` 
-in your own files.  This is because the Arduino IDE has no way to pass the 
-definition to the library code unless you actually edit `EventManager.h`. The 
-Arduino IDE lacks a way to pass precompile constants to all the files in the 
-project.  Given that the underlying compiler is GCC, it would be nice if the 
-Arduino IDE had a dialog to set things like `-D EVENTMANAGER_EVENT_QUEUE_SIZE=16` 
+If you are using the Arduino IDE, it is not enough to define this constant the
+usual C/C++ way by defining the constant *before* including `EventManager.h`
+in your own files.  This is because the Arduino IDE has no way to pass the
+definition to the library code unless you actually edit `EventManager.h`. The
+Arduino IDE lacks a way to pass precompile constants to all the files in the
+project.  Given that the underlying compiler is GCC, it would be nice if the
+Arduino IDE had a dialog to set things like `-D EVENTMANAGER_EVENT_QUEUE_SIZE=16`
 and have this constant definition passed directly to the compiler.
 
-The event queue requires `4*sizeof(int) = 8` bytes for each unit of size.
-There is a factor of 4 (instead of 2) because internally **EventManager**
+The event queue requires `2*(sizeof(int) + sizeof(EventParamType))` bytes for each
+unit of size.  Because EventParamType defaults to type int, this defaults to 8 bytes
+for each unit of size.
+There is a factor of 2 because internally **EventManager**
 maintains two separate queues: a high-priority queue and a low-priority queue.
 
 
 ### Increase Listener List Size
 
-Define `EVENTMANAGER_LISTENER_LIST_SIZE` to whatever size you need at 
+Define `EVENTMANAGER_LISTENER_LIST_SIZE` to whatever size you need at
 the very beginning of `EventManager.h` like so
 
 ```C++
@@ -321,13 +325,13 @@ the very beginning of `EventManager.h` like so
     #include <Arduino.h>
 ```
 
-If you are using the Arduino IDE, it is not enough to define this constant the 
-usual C/C++ way by defining the constant *before* including `EventManager.h` 
-in your own files.  This is because the Arduino IDE has no way to pass the 
-definition to the library code unless you actually edit `EventManager.h`. The 
-Arduino IDE lacks a way to pass precompile constants to all the files in the 
-project.  Given that the underlying compiler is GCC, it would be nice if the 
-Arduino IDE had a dialog to set things like `-D EVENTMANAGER_LISTENER_LIST_SIZE=16` 
+If you are using the Arduino IDE, it is not enough to define this constant the
+usual C/C++ way by defining the constant *before* including `EventManager.h`
+in your own files.  This is because the Arduino IDE has no way to pass the
+definition to the library code unless you actually edit `EventManager.h`. The
+Arduino IDE lacks a way to pass precompile constants to all the files in the
+project.  Given that the underlying compiler is GCC, it would be nice if the
+Arduino IDE had a dialog to set things like `-D EVENTMANAGER_LISTENER_LIST_SIZE=16`
 and have this constant definition passed directly to the compiler.
 
 The listener list requires `sizeof(*f()) + sizeof(int) + sizeof(boolean) = 5`
@@ -389,5 +393,3 @@ A copy of the license is included in the **EventManager** package.
 Copyright (c) 2016 Igor Mikolic-Torreira
 
 Portions are Copyright (c) 2010 OTTOTECNICA Italy
-
-

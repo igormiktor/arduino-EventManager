@@ -125,29 +125,29 @@ namespace
     };
 
 #elif defined( CORE_TEENSY )
-    
+
     class SuppressInterrupts
     {
     public:
-        
+
         //Reference: https://www.pjrc.com/teensy/interrupts.html
         //Backup the interrupt enable state and restore it
-        SuppressInterrupts() 
+        SuppressInterrupts()
         {
             mSregBackup = SREG;     /* save interrupt enable/disable state */
             cli();                  /* disable the global interrupt */
         }
-        
-        ~SuppressInterrupts() 
+
+        ~SuppressInterrupts()
         {
             SREG = mSregBackup;     /* restore interrupt state */
         }
-        
+
     private:
-        
+
         uint8_t mSregBackup;
     };
-    
+
 #else
 
 #error "Unknown microcontroller:  Need to implement class SuppressInterrupts for this microcontroller."
@@ -180,7 +180,7 @@ EventManager::EventManager()
 int EventManager::processEvent()
 {
     int eventCode;
-    int param;
+    EventParamType param;
     int handledCount = 0;
 
     if ( mHighPriorityQueue.popEvent( &eventCode, &param ) )
@@ -190,6 +190,7 @@ int EventManager::processEvent()
         EVTMGR_DEBUG_PRINT( "processEvent() hi-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
+        // Next line only works if EventParamType is some kind of numeric type
         EVTMGR_DEBUG_PRINT( param )
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
@@ -204,6 +205,7 @@ int EventManager::processEvent()
         EVTMGR_DEBUG_PRINT( "processEvent() lo-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
+        // Next line only works if EventParamType is some kind of numeric type
         EVTMGR_DEBUG_PRINT( param )
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
@@ -216,7 +218,7 @@ int EventManager::processEvent()
 int EventManager::processAllEvents()
 {
     int eventCode;
-    int param;
+    EventParamType param;
     int handledCount = 0;
 
     while ( mHighPriorityQueue.popEvent( &eventCode, &param ) )
@@ -226,6 +228,7 @@ int EventManager::processAllEvents()
         EVTMGR_DEBUG_PRINT( "processEvent() hi-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
+        // Next line only works if EventParamType is some kind of numeric type
         EVTMGR_DEBUG_PRINT( param )
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
@@ -238,6 +241,7 @@ int EventManager::processAllEvents()
         EVTMGR_DEBUG_PRINT( "processEvent() lo-pri event " )
         EVTMGR_DEBUG_PRINT( eventCode )
         EVTMGR_DEBUG_PRINT( ", " )
+        // Next line only works if EventParamType is some kind of numeric type
         EVTMGR_DEBUG_PRINT( param )
         EVTMGR_DEBUG_PRINT( " sent to " )
         EVTMGR_DEBUG_PRINTLN( handledCount )
@@ -410,11 +414,12 @@ boolean EventManager::ListenerList::isListenerEnabled( int eventCode, EventListe
 }
 
 
-int EventManager::ListenerList::sendEvent( int eventCode, int param )
+int EventManager::ListenerList::sendEvent( int eventCode, EventParamType param )
 {
     EVTMGR_DEBUG_PRINT( "sendEvent() enter " )
     EVTMGR_DEBUG_PRINT( eventCode )
     EVTMGR_DEBUG_PRINT( ", " )
+    // Next line only works if EventParamType is some kind of numeric type
     EVTMGR_DEBUG_PRINTLN( param )
 
     int handlerCount = 0;
@@ -541,13 +546,14 @@ mNumEvents( 0 )
     for ( int i = 0; i < kEventQueueSize; i++ )
     {
         mEventQueue[i].code = EventManager::kEventNone;
+        // Next line only works if EventParamType is a type for which 0 is a valid value
         mEventQueue[i].param = 0;
     }
 }
 
 
 
-boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
+boolean EventManager::EventQueue::queueEvent( int eventCode, EventParamType eventParam )
 {
     /*
     * The call to noInterrupts() MUST come BEFORE the full queue check.
@@ -595,7 +601,7 @@ boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
 }
 
 
-boolean EventManager::EventQueue::popEvent( int* eventCode, int* eventParam )
+boolean EventManager::EventQueue::popEvent( int* eventCode, EventParamType* eventParam )
 {
     /*
     * The call to noInterrupts() MUST come AFTER the empty queue check.
