@@ -148,6 +148,33 @@ namespace
         uint8_t mSregBackup;
     };
     
+#elif defined( ESP32 )
+    
+    #include <freertos/portmacro.h>
+
+    class SuppressInterrupts
+    {
+    public:
+        
+        // Reference: https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/freertos-smp.html#critical-sections-disabling-interrupts
+        // Enter critical section
+        SuppressInterrupts()
+        {
+            portENTER_CRITICAL(&gMux);
+        }
+        
+        // Exit critical section
+        ~SuppressInterrupts()
+        {
+            portEXIT_CRITICAL(&gMux);
+        }
+
+        static portMUX_TYPE gMux;
+    };
+    
+    // gMux is globally accessible as a public static member variable
+    portMUX_TYPE SuppressInterrupts::gMux = portMUX_INITIALIZER_UNLOCKED;
+
 #else
 
 #error "Unknown microcontroller:  Need to implement class SuppressInterrupts for this microcontroller."
@@ -547,7 +574,7 @@ mNumEvents( 0 )
 
 
 
-boolean EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
+boolean ISR_ATTR EventManager::EventQueue::queueEvent( int eventCode, int eventParam )
 {
     /*
     * The call to noInterrupts() MUST come BEFORE the full queue check.
