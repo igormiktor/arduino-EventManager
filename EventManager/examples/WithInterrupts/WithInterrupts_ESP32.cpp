@@ -23,7 +23,7 @@ struct Pins
 Pins pins[2] = { { LED_BUILTIN, LOW }, { 4, LOW } };
 
 #define TIMER0_INTERVAL_MS 100UL
-ESP32Timer interruptTimer0(0);
+ESP32Timer interruptTimer0( 0 );
 
 // IRAM_ATTR is required to place the handler in the right area of memory
 void IRAM_ATTR interruptHandler( void ) 
