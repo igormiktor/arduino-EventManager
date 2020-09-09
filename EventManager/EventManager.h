@@ -37,6 +37,14 @@
 
 #include <Arduino.h>
 
+// For ESP32, interrupt handling routines (and any functions called from them) should be placed in IRAM
+// This define allows an attribute to be specified for queueEvent() under these circumstances
+#if defined ( ESP32 )
+#define ISR_ATTR IRAM_ATTR
+#else
+#define ISR_ATTR
+#endif
+
 // Size of the listener list.  Adjust as appropriate for your application.
 // Requires a total of sizeof(*f())+sizeof(int)+sizeof(boolean) bytes of RAM for each unit of size
 #ifndef EVENTMANAGER_LISTENER_LIST_SIZE
