@@ -68,7 +68,7 @@ namespace
         uint8_t     mInterruptsWereOn;
     };
 
-#elif defined( SAM )
+#elif defined( SAM ) || defined( ARDUINO_ARCH_SAMD )
 
     class SuppressInterrupts
     {
